@@ -8,7 +8,7 @@ on:
       - 'prod-v*'
 
 env:
-  REGISTRY: reaksa7236/lms-report
+  REGISTRY: reaksa7236/garas-service-user-v2
 
 jobs:
   build-and-push:
