@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Battambang } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +10,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const khmerFont = Battambang({
+  weight: ['400', '700'],
+  subsets: ['khmer'],
+  display: 'swap',
+  variable: '--font-khmer', 
 });
 
 export const metadata: Metadata = {
@@ -23,9 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${khmerFont.variable} ${geistSans.variable} ${geistMono.variable}`}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${khmerFont.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>

@@ -1,8 +1,10 @@
+@import url("https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css");
 @import "tailwindcss";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-khmer: var(--font-khmer);
 }
 
 @theme inline {
@@ -10,6 +12,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-khmer: var(--font-khmer);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +25,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-khmer), var(--font-geist-sans), var(--font-sans), Arial, Helvetica, sans-serif;
 }
