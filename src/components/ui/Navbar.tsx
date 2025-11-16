@@ -14,7 +14,7 @@ export default function Navbar() {
       <div className="container **mx-auto** flex justify-between items-center h-full">
         <Link href="/" className="font-bold">
           <Image
-            src="/home/logo.png"
+            src="/home/Logo.png"
             alt="Logo"
             width={100}
             height={100}
