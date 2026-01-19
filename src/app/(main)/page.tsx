@@ -1,7 +1,55 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import ServiceCard from '@/components/service/serviceCard';
 import Image from "next/image";
 import Link from "next/link";
 
+const popularServices = [
+  {
+    id: 1,
+    title: 'ការផ្លាស់ប្តូរប្រេងម៉ាស៊ីន',
+    titleEn: 'Premium Oil Change',
+    code: '#0001',
+    price: 25.0,
+    image: 'https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=500',
+    description: 'ប្រេងប្រកបដោយគុណភាពខ្ពស់',
+    rating: 4.8,
+    reviews: 124,
+    duration: '30 min',
+    bookings: 450,
+  },
+  {
+    id: 2,
+    title: 'សម្អាតហ្រ្រែក',
+    titleEn: 'Brake Cleaning',
+    code: '#0002',
+    price: 35.0,
+    image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=500',
+    description: 'សម្អាតប្រព័ន្ធហ្រ្រែក',
+    rating: 4.9,
+    reviews: 98,
+    duration: '45 min',
+    bookings: 380,
+  },
+  {
+    id: 3,
+    title: 'ពិនិត្យម៉ាស៊ីន',
+    titleEn: 'Engine Check',
+    code: '#0003',
+    price: 40.0,
+    image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=500',
+    description: 'ពិនិត្យម៉ាស៊ីន',
+    rating: 4.7,
+    reviews: 156,
+    duration: '60 min',
+    bookings: 290,
+  },
+];
+
 export default function Home() {
+  const router = useRouter();
+
   return (
     <>
       {/* Herobanner */}
@@ -79,81 +127,29 @@ export default function Home() {
 
       {/* Popular Service */}
       <section className="py-10 bg-red-50">
-        <h1 className="text-3xl mb-3 font-bold text-center">សេវាកម្មដែលពេញនិយម</h1>
+        <h1 className="text-3xl mb-3 font-bold text-center">
+          សេវាកម្មដែលពេញនិយម
+        </h1>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-
-            <div className="flex flex-col w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm  dark:border-gray-700 ">
-              <div className="text-center p-4"><i className="ri-oil-line text-8xl"></i></div>
-              <div className="px-5 pb-5">
-                <a href="#">
-                  <h5 className="text-xl font-semibold tracking-tight ">សេវាកម្មប្តូរប្រេងម៉ាសុីន</h5>
-                </a>
-                <div className="flex items-center my-2">
-                  <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-half-line text-yellow-400"></i>
-                  </div>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-sm dark:bg-blue-200 dark:text-blue-800 ">4.5</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold ">$599</span>
-                  <a href="#" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">ព័ត៍មានលម្អិត</a>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {popularServices.map((service, index) => (
+              <div
+                key={service.id}
+                onClick={() => router.push(`/service/service/${service.id}`)}
+                className="cursor-pointer"
+              >
+                <ServiceCard
+                  service={service}
+                  isPopular={true}
+                  rank={index + 1}
+                />
               </div>
-            </div>
-
-            <div className="flex flex-col w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm  dark:border-gray-700 ">
-              <div className="text-center p-4"><i className="ri-oil-line text-8xl"></i></div>
-              <div className="px-5 pb-5">
-                <a href="#">
-                  <h5 className="text-xl font-semibold tracking-tight ">សេវាកម្មប្តូរប្រេងម៉ាសុីន</h5>
-                </a>
-                <div className="flex items-center my-2">
-                  <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-half-line text-yellow-400"></i>
-                  </div>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-sm dark:bg-blue-200 dark:text-blue-800 ms-3">4.5</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold ">$599</span>
-                  <a href="#" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">ព័ត៍មានលម្អិត</a>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm  dark:border-gray-700 ">
-              <div className="text-center p-4"><i className="ri-oil-line text-8xl"></i></div>
-              <div className="px-5 pb-5">
-                <a href="#">
-                  <h5 className="text-xl font-semibold tracking-tight ">សេវាកម្មប្តូរប្រេងម៉ាសុីន</h5>
-                </a>
-                <div className="flex items-center my-2">
-                  <div className="flex items-center space-x-1 rtl:space-x-reverse">
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-fill text-yellow-400"></i>
-                    <i className="ri-star-half-line text-yellow-400"></i>
-                  </div>
-                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-sm dark:bg-blue-200 dark:text-blue-800 ms-3">4.5</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold ">$599</span>
-                  <a href="#" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">ព័ត៍មានលម្អិត</a>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
+
 
       {/* Way to Find us */}
       <section className="py-10">
