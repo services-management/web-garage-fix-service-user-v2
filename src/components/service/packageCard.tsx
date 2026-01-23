@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Clock, Award, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface PackageCardProps {
     pkg: any;
@@ -7,6 +8,8 @@ interface PackageCardProps {
 }
 
 export default function PackageCard({ pkg, isPopular = false }: PackageCardProps) {
+    const router = useRouter();
+
     return (
         <div className={`bg-white rounded-xl ${isPopular ? 'shadow-xl hover:shadow-2xl border-2 border-red-100' : 'shadow-md hover:shadow-xl'} transition-all duration-300 overflow-hidden group cursor-pointer`}>
             <div className="relative overflow-hidden">
@@ -106,7 +109,15 @@ export default function PackageCard({ pkg, isPopular = false }: PackageCardProps
                             </span>
                         </div>
                     </div>
-                    <button className={`bg-red-600 text-white ${isPopular ? 'px-8 py-3' : 'px-6 py-2'} rounded-lg hover:bg-red-700 transition-colors font-semibold`}>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(
+                                `/booking?packageId=${pkg.id}&packageName=${encodeURIComponent(pkg.title)}`
+                            );
+                        }}
+                        className={`bg-red-600 text-white ${isPopular ? 'px-8 py-3' : 'px-6 py-2'} rounded-lg hover:bg-red-700 transition-colors font-semibold`}
+                    >
                         កក់ឥឡូវ
                     </button>
                 </div>

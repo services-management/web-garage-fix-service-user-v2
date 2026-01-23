@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Clock, Award, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation'; 
 
 interface ServiceCardProps {
     service: any;
@@ -8,13 +9,15 @@ interface ServiceCardProps {
 }
 
 export default function ServiceCard({ service, isPopular = false, rank = null }: ServiceCardProps) {
+    const router = useRouter();
+
     return (
         <div className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer">
             <div className="relative overflow-hidden">
-                <img 
-                    src={service.image} 
-                    alt={service.title} 
-                    className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300" 
+                <img
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300"
                 />
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-50 transition-opacity duration-300 flex items-center justify-center">
@@ -63,9 +66,19 @@ export default function ServiceCard({ service, isPopular = false, rank = null }:
                     <span className={`${isPopular ? 'text-3xl' : 'text-2xl'} font-bold text-red-600`}>
                         ${service.price}
                     </span>
-                    <button className={`bg-red-600 text-white ${isPopular ? 'px-6 py-3' : 'px-5 py-2 text-sm'} rounded-lg hover:bg-red-700 transition-colors font-semibold`}>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation(); 
+                            router.push(
+                                `/booking?serviceId=${service.id}&serviceName=${encodeURIComponent(service.title)}`
+                            );
+                        }}
+                        className={`bg-red-600 text-white ${isPopular ? 'px-6 py-3' : 'px-5 py-2 text-sm'
+                            } rounded-lg hover:bg-red-700 transition-colors font-semibold`}
+                    >
                         {isPopular ? 'កក់ឥឡូវ' : 'កក់'}
                     </button>
+
                 </div>
             </div>
         </div>
