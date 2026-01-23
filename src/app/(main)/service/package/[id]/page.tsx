@@ -160,6 +160,12 @@ export default function PackageDetail() {
     setExpandedService(expandedService === index ? null : index);
   };
 
+  const handleBooking = () => {
+    router.push(
+      `/booking?packageId=${pkg.id}&packageName=${encodeURIComponent(pkg.title)}`
+    );
+  };
+
   /* =======================
      Render
   ======================= */
@@ -433,7 +439,10 @@ export default function PackageDetail() {
                                 </div>
                             </div>
 
-                            <button className="w-full bg-red-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors mb-4">
+                            <button 
+                                onClick={handleBooking}
+                                className="w-full bg-red-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors mb-4"
+                            >
                                 កក់កញ្ចប់នេះឥឡូវ
                             </button>
 

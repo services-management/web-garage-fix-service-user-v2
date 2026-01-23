@@ -19,7 +19,7 @@ import { useRouter, useParams } from 'next/navigation';
 export default function ServiceDetail() {
   const router = useRouter();
   const params = useParams();
-  const serviceId = params.id as string; // ✅ FIXED
+  const serviceId = params.id as string;
 
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -61,6 +61,12 @@ export default function ServiceDetail() {
         specialty: 'Engine Specialist',
       },
     ],
+  };
+
+  const handleBooking = () => {
+    router.push(
+      `/booking?serviceId=${service.id}&serviceName=${encodeURIComponent(service.title)}`
+    );
   };
 
   return (
@@ -131,7 +137,10 @@ export default function ServiceDetail() {
               <div className="text-3xl font-bold text-red-600">
                 ${service.price}
               </div>
-              <button className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition">
+              <button 
+                onClick={handleBooking}
+                className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
+              >
                 កក់ឥឡូវនេះ
               </button>
             </div>

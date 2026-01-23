@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, TrendingUp, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
     product: any;
@@ -8,6 +9,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, isPopular = false, rank = null }: ProductCardProps) {
+    const router = useRouter();
+
     return (
         <div className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer">
             <div className="relative overflow-hidden">
@@ -60,7 +63,15 @@ export default function ProductCard({ product, isPopular = false, rank = null }:
                     <span className={`${isPopular ? 'text-3xl' : 'text-2xl'} font-bold text-red-600`}>
                         ${product.price}
                     </span>
-                    <button className={`bg-green-600 text-white ${isPopular ? 'px-6 py-3' : 'px-5 py-2 text-sm'} rounded-lg hover:bg-green-700 transition-colors font-semibold`}>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(
+                                `/booking?productId=${product.id}&productName=${encodeURIComponent(product.name)}`
+                            );
+                        }}
+                        className={`bg-green-600 text-white ${isPopular ? 'px-6 py-3' : 'px-5 py-2 text-sm'} rounded-lg hover:bg-green-700 transition-colors font-semibold`}
+                    >
                         {isPopular ? 'ទិញឥឡូវ' : 'ទិញ'}
                     </button>
                 </div>

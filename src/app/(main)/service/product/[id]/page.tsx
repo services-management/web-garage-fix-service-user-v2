@@ -9,14 +9,15 @@ interface ProductDetailProps {
 import { useRouter, useParams } from 'next/navigation';
 export default function ProductDetail() {
     const params = useParams();
-    const serviceId = params.id as string; // ✅ FIXED
+    const productId = params.id as string;
+    const router = useRouter();
+    
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
-    const router = useRouter();
 
     // In real app, fetch product data based on productId
     const product = {
-        id: 1,
+        id: productId || 1,
         name: 'Engine Oil 5W-30',
         nameKh: 'ប្រេងម៉ាស៊ីន 5W-30',
         code: '#P001',
@@ -84,6 +85,12 @@ export default function ProductDetail() {
         if (newQuantity >= 1 && newQuantity <= product.stockQuantity) {
             setQuantity(newQuantity);
         }
+    };
+
+    const handleAddToCart = () => {
+        router.push(
+            `/booking?productId=${product.id}&productName=${encodeURIComponent(product.name)}&quantity=${quantity}`
+        );
     };
 
     return (
@@ -226,7 +233,10 @@ export default function ProductDetail() {
 
                             {/* Action Buttons */}
                             <div className="space-y-3 mb-6">
-                                <button className="w-full bg-red-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+                                <button 
+                                    onClick={handleAddToCart}
+                                    className="w-full bg-red-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                                >
                                     <ShoppingCart className="w-5 h-5" />
                                     បន្ថែមទៅកន្ត្រក
                                 </button>
