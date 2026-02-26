@@ -1,62 +1,70 @@
+'use client';
+
 import React from 'react';
+import { Check, User, Wrench, ClipboardCheck } from 'lucide-react';
 
 interface StepperProps {
   currentStep: number;
 }
 
-export default function Stepper({ currentStep }: StepperProps) {
-  const steps = [
-    { number: 1, label: 'ព័ត៌មានផ្ទាល់ខ្លួន', shortLabel: 'ព័ត៌មាន' },
-    { number: 2, label: 'ជ្រើសរើសសេវាកម្ម', shortLabel: 'សេវាកម្ម' },
-    { number: 3, label: 'បញ្ជាក់ការកក់', shortLabel: 'បញ្ជាក់' }
-  ];
+const steps = [
+  { number: 1, label: 'ព័ត៌មានការកក់', labelEn: 'Personal Info', icon: User },
+  { number: 2, label: 'ជ្រើសរើសសេវា', labelEn: 'Select Service', icon: Wrench },
+  { number: 3, label: 'បញ្ជាក់ការកក់', labelEn: 'Confirmation', icon: ClipboardCheck },
+];
 
+export default function Stepper({ currentStep }: StepperProps) {
   return (
-    <div className="mb-6 sm:mb-8">
-      {/* Desktop Stepper */}
-      <div className="hidden md:flex justify-between items-center max-w-7xl mx-auto px-4 my-3">
-        {steps.map((step, index) => (
+    <div className="flex items-center justify-center w-full max-w-lg mx-auto py-4 px-2">
+      {steps.map((step, index) => {
+        const Icon = step.icon;
+        const isCompleted = currentStep > step.number;
+        const isActive = currentStep === step.number;
+
+        return (
           <React.Fragment key={step.number}>
-            <div className={`flex items-center ${currentStep !== step.number ? 'opacity-50' : ''}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                currentStep === step.number
-                  ? 'bg-red-700 text-white'
-                  : currentStep > step.number
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-300 text-gray-600'
-              }`}>
-                {currentStep > step.number ? '✓' : step.number}
+            {/* Step node */}
+            <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+              {/* Circle */}
+              <div className={`
+                                relative w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-all duration-300
+                                ${isCompleted ? 'bg-gradient-to-br from-green-400 to-green-600'
+                  : isActive ? 'bg-gradient-to-br from-[#DC2626] to-[#F97316] scale-110 shadow-red-200'
+                    : 'bg-gray-100'}
+                            `}>
+                {isCompleted
+                  ? <Check className="w-5 h-5 text-white" strokeWidth={3} />
+                  : <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                }
+                {isActive && (
+                  <span className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#DC2626] to-[#F97316] opacity-25 animate-ping" />
+                )}
               </div>
-              <span className={`ml-3 ${currentStep === step.number ? 'font-semibold' : 'text-gray-500'}`}>
-                {step.label}
-              </span>
+
+              {/* Label */}
+              <div className="text-center w-20">
+                <p className={`text-[10px] font-black leading-tight
+                                    ${isActive ? 'text-[#DC2626]' : isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
+                  {step.label}
+                </p>
+                <p className={`text-[9px] font-semibold hidden sm:block
+                                    ${isActive ? 'text-orange-400' : isCompleted ? 'text-green-400' : 'text-gray-300'}`}>
+                  {step.labelEn}
+                </p>
+              </div>
             </div>
+
+            {/* Connector */}
             {index < steps.length - 1 && (
-              <div className={`flex-1 h-0.5 mx-4 ${currentStep > step.number ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div className="flex-1 mx-2 mb-5 h-0.5 rounded-full bg-gray-200 overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-700
+                                    ${currentStep > step.number ? 'w-full bg-gradient-to-r from-green-400 to-green-500' : 'w-0'}`}
+                />
+              </div>
             )}
           </React.Fragment>
-        ))}
-      </div>
-
-      {/* Mobile Stepper */}
-      <div className="md:hidden flex justify-center items-center gap-4 px-4">
-        {steps.map((step) => (
-          <div key={step.number} className="flex flex-col items-center flex-1">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold mb-2 ${
-              currentStep === step.number
-                ? 'bg-red-700 text-white'
-                : currentStep > step.number
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-300 text-gray-600'
-            }`}>
-              {currentStep > step.number ? '✓' : step.number}
-            </div>
-            <span className={`text-xs text-center ${currentStep === step.number ? 'font-semibold' : 'text-gray-500'}`}>
-              {step.shortLabel}
-            </span>
-          </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

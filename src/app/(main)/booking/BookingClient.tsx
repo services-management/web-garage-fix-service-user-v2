@@ -25,6 +25,11 @@ export default function BookingClient() {
         appointment_date: string;
         start_time: string;
         service_location: string;
+        // home address fields
+        district: string;
+        commune: string;
+        street: string;
+        location_note: string;
         note: string;
         source: string;
     }
@@ -39,14 +44,37 @@ export default function BookingClient() {
         appointment_date: '',
         start_time: '',
         service_location: '',
+        district: '',
+        commune: '',
+        street: '',
+        location_note: '',
         note: '',
-        source: 'Web'
+        source: 'Web',
     });
 
+    // ── Read serviceType from URL param first, then localStorage fallback ──
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // URL params
+    // Service page passes ?tab=oil-home  or  ?tab=oil-garage
+    const tabParam = searchParams.get('tab') as 'oil-home' | 'oil-garage' | null;
+
+    const [serviceType, setServiceType] = useState<'oil-home' | 'oil-garage'>('oil-garage');
+
+    useEffect(() => {
+        if (tabParam) {
+            // Prefer URL param (most reliable)
+            setServiceType(tabParam === 'oil-home' ? 'oil-home' : 'oil-garage');
+        } else {
+            // Fallback: check localStorage saved by service page
+            const saved = localStorage.getItem('bookingServiceType');
+            if (saved === 'oil-home' || saved === 'oil-garage') {
+                setServiceType(saved);
+            }
+        }
+    }, [tabParam]);
+
+    // ── URL params for pre-selected items ──
     const serviceId = searchParams.get('serviceId');
     const packageId = searchParams.get('packageId');
     const productId = searchParams.get('productId');
@@ -63,8 +91,8 @@ export default function BookingClient() {
             rating: 4.8,
             reviews: 245,
             duration: '2 ម៉ោង',
-            bookings: 1250
-        }
+            bookings: 1250,
+        },
     ];
 
     const packages = [
@@ -82,8 +110,8 @@ export default function BookingClient() {
             reviews: 456,
             duration: '3-4 ម៉ោង',
             services: ['សម្អាត', 'ខាក់ស៊ី', 'ពិនិត្យ'],
-            products: ['ក្រមសម្អាត', 'ប្រេងម៉ាស៊ីន']
-        }
+            products: ['ក្រមសម្អាត', 'ប្រេងម៉ាស៊ីន'],
+        },
     ];
 
     const products = [
@@ -97,8 +125,8 @@ export default function BookingClient() {
             price: 35,
             rating: 4.7,
             reviews: 189,
-            sales: 850
-        }
+            sales: 850,
+        },
     ];
 
     let selectedItem: any = null;
@@ -121,19 +149,15 @@ export default function BookingClient() {
                 itemType === 'service'
                     ? selectedItem.title
                     : itemType === 'package'
-                        ? selectedItem.titleKh || selectedItem.title
-                        : selectedItem.nameKh || selectedItem.name;
+                    ? selectedItem.titleKh || selectedItem.title
+                    : selectedItem.nameKh || selectedItem.name;
 
             setFormData(prev => ({
                 ...prev,
-                items: [{
-                    id: selectedItem.id,
-                    type: itemType,
-                    name: itemName,
-                    price: selectedItem.price
-                }]
+                items: [{ id: selectedItem.id, type: itemType!, name: itemName, price: selectedItem.price }],
             }));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleNext = () => setCurrentStep(s => s + 1);
@@ -141,6 +165,8 @@ export default function BookingClient() {
 
     const handleSubmit = async () => {
         console.log('Booking Data:', formData);
+        // Clean up localStorage after booking
+        localStorage.removeItem('bookingServiceType');
         alert('ការកក់របស់អ្នកត្រូវបានដាក់ស្នើដោយជោគជ័យ!');
     };
 
@@ -165,6 +191,7 @@ export default function BookingClient() {
                     onNext={handleNext}
                     selectedItem={selectedItem}
                     itemType={itemType}
+                    serviceType={serviceType}
                 />
             )}
 
