@@ -206,6 +206,10 @@
 import { Suspense } from 'react';
 import BookingClient from './BookingClient';
 
+export const metadata = {
+  title: "Booking - MR.LUBE",
+};
+
 export default function BookingPage() {
     return (
         <Suspense fallback={<div className="p-6">Loading booking...</div>}>

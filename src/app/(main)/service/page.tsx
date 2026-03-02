@@ -141,6 +141,13 @@ const ProductCardSkeleton = () => (
 
 export default function ServiceRedesigned() {
     const [activeTab, setActiveTab] = useState('oil-home');
+    useEffect(() => {
+        const currentTab = TABS.find(tab => tab.id === activeTab);
+
+        if (currentTab) {
+            document.title = `${currentTab.labelEn} - MR.LUBE`;
+        }
+    }, [activeTab]);
     const router = useRouter();
 
     // Car selection state

@@ -1,4 +1,7 @@
 import Image from 'next/image'
+export const metadata = {
+  title: "About Us - MR.LUBE",
+};
 
 export default function AboutUs() {
     return (
