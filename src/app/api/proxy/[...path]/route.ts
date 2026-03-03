@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE = 'https://garas-api.itedev.online';
+const API_BASE = 'https://garas-api.domrey.online';
 
 export async function GET(
     req: Request,
