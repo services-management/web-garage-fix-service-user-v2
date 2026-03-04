@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
     Star, Clock, TrendingUp, ChevronRight, Award, Tag, Package,
     Wrench, ShoppingBag, Home, Building2, Sparkles, Zap, Shield,
@@ -11,26 +12,23 @@ import {
 import ProductCard from '../../../components/service/productCard';
 import { getAllProducts } from '@/lib/api/product';
 
-// Tab Configuration
-const TABS = [
+// Tab Configuration - will be translated in component
+const getTabs = (t: any) => [
     {
         id: 'oil-home',
-        label: 'កក់សេវាកម្មប្តូរប្រេងនៅផ្ទះ',
-        labelEn: 'Booking service Oil Change at Home',
+        label: t('service.tabs.oilHome'),
         icon: Home,
         color: 'from-[#3B82F6] to-[#2563EB]'
     },
     {
         id: 'oil-garage',
-        label: 'កក់សេវាកម្មប្តូរប្រេងនៅហាង',
-        labelEn: 'Booking service Oil Change at Garage',
+        label: t('service.tabs.oilGarage'),
         icon: Building2,
         color: 'from-[#A855F7] to-[#9333EA]'
     },
     {
         id: 'products',
-        label: 'ទិញផលិតផល',
-        labelEn: 'Order Products',
+        label: t('service.tabs.products'),
         icon: ShoppingBag,
         color: 'from-[#10B981] to-[#059669]'
     }
@@ -71,52 +69,46 @@ const ENGINE_TYPES: { [key: string]: string[] } = {
     'Plug-in Hybrid': ['2.5L PHEV']
 };
 
-// Service Package Options
-const SERVICE_OPTIONS = [
+// Service Package Options - will be translated in component
+const getServiceOptions = (t: any) => [
     {
         id: 'engine-oil',
-        title: 'ប្រេងម៉ាស៊ីន 5W-40',
-        titleEn: 'Engine Oil 5W-40',
+        title: t('service.serviceOptions.engineOil'),
         price: 55,
         included: true,
         required: true
     },
     {
         id: 'transmission-fluid',
-        title: 'ប្រេងប្រអប់លេខ (Dexron iii)',
-        titleEn: 'Transmission Fluid (Dexron iii)',
+        title: t('service.serviceOptions.transmissionFluid'),
         price: 60,
         included: false,
         required: false
     },
     {
         id: 'engine-flush',
-        title: 'ថ្នាំសម្អាតម៉ាស៊ីន',
-        titleEn: 'Engine Flush',
+        title: t('service.serviceOptions.engineFlush'),
         price: 13,
         included: false,
         required: false
     },
     {
         id: 'brake-fluid',
-        title: 'ប្រេងហ្រ៊ែម កត្តិង',
-        titleEn: 'Brake Fluid Dot3/Dot4',
+        title: t('service.serviceOptions.brakeFluid'),
         price: 15,
         included: false,
         required: false
     },
     {
         id: 'coolant',
-        title: 'ទឹកក្រោស',
-        titleEn: 'Coolant (40$ Dot3 & 50$ Dot4)',
+        title: t('service.serviceOptions.coolant'),
         price: 45,
         included: false,
         required: false
     },
     {
         id: 'air-condition',
-        title: 'ទឹកម៉ាស៊ីនត្រជាក់',
-        titleEn: 'Air Condition -45C° 4L/35$',
+        title: t('service.serviceOptions.airCondition'),
         price: 35,
         included: false,
         required: false
@@ -140,14 +132,19 @@ const ProductCardSkeleton = () => (
 );
 
 export default function ServiceRedesigned() {
+    const t = useTranslations();
+    const TABS = getTabs(t);
+    const SERVICE_OPTIONS = getServiceOptions(t);
     const [activeTab, setActiveTab] = useState('oil-home');
     useEffect(() => {
-        const currentTab = TABS.find(tab => tab.id === activeTab);
-
-        if (currentTab) {
-            document.title = `${currentTab.labelEn} - MR.LUBE`;
-        }
-    }, [activeTab]);
+        const pageTitleMap: Record<string, string> = {
+            'oil-home': t('service.pageTitles.oilHome'),
+            'oil-garage': t('service.pageTitles.oilGarage'),
+            'products': t('service.pageTitles.products'),
+        };
+        const pageTitle = pageTitleMap[activeTab] || t('service.pageTitles.oilHome');
+        document.title = `${pageTitle} - MR.LUBE`;
+    }, [activeTab, t]);
     const router = useRouter();
 
     // Car selection state
@@ -230,14 +227,14 @@ export default function ServiceRedesigned() {
                     : 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80',
                 badge_icon: 'home',
                 badge_text: isHome ? 'Home Service' : 'Garage Service',
-                title: isHome ? 'សេវាកម្មនៅផ្ទះអ្នក' : 'សេវាកម្មនៅហាង',
+                title: isHome ? t('service.banner.homeServiceTitle') : t('service.banner.garageServiceTitle'),
                 description: isHome
-                    ? 'យើងមកផ្ទះអ្នកដើម្បីផ្តល់សេវាកម្មគុណភាពខ្ពស់ ដោយក្រុមអ្នកជំនាញដែលមានបទពិសោធន៍'
-                    : 'ចូលមកហាងរបស់យើងដើម្បីទទួលសេវាកម្មល្អបំផុត ជាមួយឧបករណ៍ទំនើបបំផុត',
+                    ? t('service.banner.homeServiceDesc')
+                    : t('service.banner.garageServiceDesc'),
                 features: [
-                    { text: 'ជំនាញវិជ្ជាជីវៈ' },
-                    { text: 'សេវាកម្មរហ័ស' },
-                    { text: 'ធានាគុណភាព' }
+                    { text: t('service.banner.feature1') },
+                    { text: t('service.banner.feature2') },
+                    { text: t('service.banner.feature3') }
                 ]
             },
             {
@@ -247,12 +244,12 @@ export default function ServiceRedesigned() {
                     : 'https://images.unsplash.com/photo-1632823471565-1ecdf5c6da45?w=1400&q=80',
                 badge_icon: 'award',
                 badge_text: 'Quality Guaranteed',
-                title: 'ធានាគុណភាព 100%',
-                description: 'ប្រើប្រេងម៉ាស៊ីនគុណភាពខ្ពស់ Castrol / Mobil 1 និងបច្ចេកទេសជំនាញ ធានា 6 ខែ ឬ 10,000 គីឡូម៉ែត្រ',
+                title: t('service.banner.qualityTitle'),
+                description: t('service.banner.qualityDesc'),
                 features: [
-                    { text: 'តម្លៃសមរម្យ' },
-                    { text: 'ធានា 6 ខែ' },
-                    { text: 'ប្រេងម៉ាស៊ីនល្អ' }
+                    { text: t('service.banner.qualityFeature1') },
+                    { text: t('service.banner.qualityFeature2') },
+                    { text: t('service.banner.qualityFeature3') }
                 ]
             },
             {
@@ -262,12 +259,12 @@ export default function ServiceRedesigned() {
                     : 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=1400&q=80',
                 badge_icon: 'clock',
                 badge_text: 'Fast & Efficient',
-                title: 'សេវាកម្មរហ័ស 30 នាទី',
-                description: 'បញ្ចប់ការប្តូរប្រេងម៉ាស៊ីនក្នុងរយៈពេលត្រឹមតែ 30-45 នាទី រួមទាំងការត្រួតពិនិត្យជំនាញ',
+                title: t('service.banner.fastTitle'),
+                description: t('service.banner.fastDesc'),
                 features: [
-                    { text: 'ងាយស្រួល' },
-                    { text: 'សន្សំពេលវេលា' },
-                    { text: 'មិនចាំបាច់ចាំយូរ' }
+                    { text: t('service.banner.fastFeature1') },
+                    { text: t('service.banner.fastFeature2') },
+                    { text: t('service.banner.fastFeature3') }
                 ]
             },
             {
@@ -277,12 +274,12 @@ export default function ServiceRedesigned() {
                     : 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=1400&q=80',
                 badge_icon: 'home',
                 badge_text: 'Special Offer',
-                title: 'ការបញ្ចុះតម្លៃពិសេស',
-                description: 'ទទួលបានការបញ្ចុះតម្លៃ 20% សម្រាប់ការកក់លើកដំបូង និងសេវាកម្មបន្ថែមឥតគិតថ្លៃ',
+                title: t('service.banner.discountTitle'),
+                description: t('service.banner.discountDesc'),
                 features: [
-                    { text: 'បញ្ចុះ 20%' },
-                    { text: 'ត្រួតពិនិត្យឥតគិតថ្លៃ' },
-                    { text: 'ចូលរួមក្លឹបពិសេស' }
+                    { text: t('service.banner.discountFeature1') },
+                    { text: t('service.banner.discountFeature2') },
+                    { text: t('service.banner.discountFeature3') }
                 ]
             }
         ];
@@ -392,12 +389,6 @@ export default function ServiceRedesigned() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
             <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hanuman:wght@400;700;900&display=swap');
-                
-                body {
-                    font-family: 'Poppins', 'Hanuman', sans-serif;
-                }
-
                 @keyframes float {
                     0%, 100% { transform: translateY(0px); }
                     50% { transform: translateY(-20px); }
@@ -464,14 +455,14 @@ export default function ServiceRedesigned() {
                             </div>
 
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-3 leading-tight">
-                                <span className="block text-white drop-shadow-2xl">សេវាកម្ម</span>
+                                <span className="block text-white drop-shadow-2xl">{t('service.hero.title')}</span>
                                 <span className="block bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#F97316] bg-clip-text text-transparent mt-2">
-                                    ថែទាំរថយន្ត
+                                    {t('service.hero.subtitle')}
                                 </span>
                             </h1>
 
                             <p className="text-lg sm:text-xl text-gray-300 max-w-xl leading-relaxed">
-                                ជ្រើសរើសសេវាកម្មដែលសមស្របបំផុតសម្រាប់រថយន្តរបស់អ្នក ជាមួយបច្ចេកទេសជំនាញ និងគុណភាពខ្ពស់
+                                {t('service.hero.description')}
                             </p>
 
                             <div className="flex flex-wrap gap-4 my-6">
@@ -479,7 +470,7 @@ export default function ServiceRedesigned() {
                                     <div className="absolute inset-0 bg-gradient-to-r from-[#F97316] to-[#DC2626] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                     <div className="relative flex items-center gap-3">
                                         <Sparkles className="w-5 h-5" />
-                                        <span>ស្វែងរកសេវាកម្ម</span>
+                                        <span>{t('service.hero.searchButton')}</span>
                                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </button>
@@ -488,15 +479,15 @@ export default function ServiceRedesigned() {
                             <div className="flex flex-wrap gap-8 mt-5 pt-10 border-t border-white/10">
                                 <div className="text-center">
                                     <div className="text-3xl font-black text-white mb-1">5000+</div>
-                                    <div className="text-sm text-gray-400">អតិថិជនសប្បាយចិត្ត</div>
+                                    <div className="text-sm text-gray-400">{t('service.hero.happyCustomers')}</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="text-3xl font-black text-white mb-1">50+</div>
-                                    <div className="text-sm text-gray-400">សេវាកម្ម</div>
+                                    <div className="text-sm text-gray-400">{t('service.hero.services')}</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="text-3xl font-black text-white mb-1">24/7</div>
-                                    <div className="text-sm text-gray-400">ជួយគាំទ្រ</div>
+                                    <div className="text-sm text-gray-400">{t('service.hero.support')}</div>
                                 </div>
                             </div>
                         </div>
@@ -578,12 +569,6 @@ export default function ServiceRedesigned() {
                                                     ${isActive ? 'text-white' : 'text-gray-900'}
                                                 `}>
                                                     {tab.label}
-                                                </span>
-                                                <span className={`
-                                                    text-xs font-semibold leading-none
-                                                    ${isActive ? 'text-white/90' : 'text-gray-500'}
-                                                `}>
-                                                    {tab.labelEn}
                                                 </span>
                                             </div>
 
@@ -732,10 +717,10 @@ export default function ServiceRedesigned() {
                         <section>
                             <div className="text-center mb-8">
                                 <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
-                                    ជ្រើសរើសព័ត៌មានរថយន្ត
+                                    {t('service.carInfo.title')}
                                 </h2>
                                 <p className="text-base md:text-lg text-gray-600">
-                                    បញ្ចូលព័ត៌មានរថយន្តដើម្បីទទួលបានសេវាកម្មដែលសមស្រប
+                                    {t('service.carInfo.subtitle')}
                                 </p>
                             </div>
 
@@ -749,7 +734,7 @@ export default function ServiceRedesigned() {
                                                 <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
                                                     <Car className="w-4 h-4 text-red-500" />
                                                 </div>
-                                                ម៉ាករថយន្ត (Car Make) *
+                                                {t('service.carFilter.carMake')} *
                                             </label>
                                             <div className="relative">
                                                 <select
@@ -757,7 +742,7 @@ export default function ServiceRedesigned() {
                                                     onChange={(e) => setSelectedMake(e.target.value)}
                                                     className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
                                                 >
-                                                    <option value="">ជ្រើសរើសម៉ាករថយន្ត</option>
+                                                    <option value="">{t('service.carFilter.selectCarMake')}</option>
                                                     {CAR_MAKES.map(make => (
                                                         <option key={make} value={make}>{make}</option>
                                                     ))}
@@ -773,7 +758,7 @@ export default function ServiceRedesigned() {
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
                                                         <Calendar className="w-4 h-4 text-red-500" />
                                                     </div>
-                                                    ឆ្នាំផលិត (Year) *
+                                                    {t('service.carFilter.year')} *
                                                 </label>
                                                 <div className="relative">
                                                     <select
@@ -781,7 +766,7 @@ export default function ServiceRedesigned() {
                                                         onChange={(e) => setSelectedYear(e.target.value)}
                                                         className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
                                                     >
-                                                        <option value="">ជ្រើសរើសឆ្នាំ</option>
+                                                        <option value="">{t('service.carFilter.selectYear')}</option>
                                                         {years.map(year => (
                                                             <option key={year} value={year}>{year}</option>
                                                         ))}
@@ -798,7 +783,7 @@ export default function ServiceRedesigned() {
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
                                                         <Settings className="w-4 h-4 text-red-500" />
                                                     </div>
-                                                    ម៉ូដែល/ស៊េរី (Model/Series) *
+                                                    {t('service.carFilter.model')} *
                                                 </label>
                                                 <div className="relative">
                                                     <select
@@ -806,7 +791,7 @@ export default function ServiceRedesigned() {
                                                         onChange={(e) => setSelectedModel(e.target.value)}
                                                         className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
                                                     >
-                                                        <option value="">ជ្រើសរើសម៉ូដែល</option>
+                                                        <option value="">{t('service.carFilter.selectModel')}</option>
                                                         {getAvailableModels().map(model => (
                                                             <option key={model} value={model}>{model}</option>
                                                         ))}
@@ -823,7 +808,7 @@ export default function ServiceRedesigned() {
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
                                                         <Droplet className="w-4 h-4 text-red-500" />
                                                     </div>
-                                                    ប្រភេទឥន្ធនៈ (Fuel Type) *
+                                                    {t('service.carFilter.fuelType')} *
                                                 </label>
                                                 <div className="relative">
                                                     <select
@@ -831,7 +816,7 @@ export default function ServiceRedesigned() {
                                                         onChange={(e) => setSelectedFuelType(e.target.value)}
                                                         className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
                                                     >
-                                                        <option value="">ជ្រើសរើសប្រភេទឥន្ធនៈ</option>
+                                                        <option value="">{t('service.carFilter.selectFuelType')}</option>
                                                         {FUEL_TYPES.map(fuel => (
                                                             <option key={fuel} value={fuel}>{fuel}</option>
                                                         ))}
@@ -848,7 +833,7 @@ export default function ServiceRedesigned() {
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
                                                         <Zap className="w-4 h-4 text-red-500" />
                                                     </div>
-                                                    ម៉ាស៊ីន (Engine) *
+                                                    {t('service.carFilter.engine')} *
                                                 </label>
                                                 <div className="relative">
                                                     <select
@@ -856,7 +841,7 @@ export default function ServiceRedesigned() {
                                                         onChange={(e) => setSelectedEngine(e.target.value)}
                                                         className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
                                                     >
-                                                        <option value="">ជ្រើសរើសម៉ាស៊ីន</option>
+                                                        <option value="">{t('service.carFilter.selectEngine')}</option>
                                                         {getAvailableEngines().map(engine => (
                                                             <option key={engine} value={engine}>{engine}</option>
                                                         ))}
@@ -875,7 +860,7 @@ export default function ServiceRedesigned() {
                                                     </div>
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-2">
-                                                            <span className="text-sm font-bold text-green-700">✅ រថយន្តរបស់អ្នក</span>
+                                                            <span className="text-sm font-bold text-green-700">{t('service.carFilter.yourCar')}</span>
                                                         </div>
                                                         <p className="text-2xl font-black text-gray-900 mb-3">
                                                             {selectedYear} {selectedMake} {selectedModel}
@@ -904,13 +889,13 @@ export default function ServiceRedesigned() {
                             <section id="service-cards-section" className="mt-12 animate-slide-up">
                                 <div className="text-center mb-12">
                                     <div className="inline-block px-6 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mb-4">
-                                        <span className="text-purple-600 font-bold text-sm">ជំហានទី 2</span>
+                                        <span className="text-purple-600 font-bold text-sm">{t('service.step2.badge')}</span>
                                     </div>
                                     <h2 className="text-3xl md:text-5xl font-black text-gray-900 mb-3">
-                                        ជ្រើសរើសសេវាកម្ម
+                                        {t('service.step2.title')}
                                     </h2>
                                     <p className="text-lg md:text-xl text-gray-600">
-                                        ជ្រើសរើសសេវាកម្មដែលអ្នកត្រូវការសម្រាប់រថយន្តរបស់អ្នក
+                                        {t('service.step2.subtitle')}
                                     </p>
                                 </div>
 
@@ -932,10 +917,10 @@ export default function ServiceRedesigned() {
                                                     <span className="text-sm font-bold">V4 Package</span>
                                                 </div>
                                                 <h3 className="text-3xl font-black mb-2">
-                                                    សេវាកម្មប្រេងម៉ាស៊ីន
+                                                    {t('service.package.title')}
                                                 </h3>
                                                 <p className="text-lg opacity-90">
-                                                    Oil Change Service Package
+                                                    {t('service.package.subtitle')}
                                                 </p>
                                             </div>
                                         </div>
@@ -946,7 +931,7 @@ export default function ServiceRedesigned() {
                                                 <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                                                     <Wrench className="w-6 h-6 text-white" />
                                                 </div>
-                                                ជ្រើសរើសសេវា
+                                                {t('service.package.selectService')}
                                             </h3>
 
                                             <div className="space-y-3 mb-8">
@@ -982,12 +967,12 @@ export default function ServiceRedesigned() {
                                                                 </h4>
                                                                 {service.required && (
                                                                     <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                                                                        តម្រូវ
+                                                                        {t('service.required', { defaultValue: 'តម្រូវ' })}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             <p className="text-xs text-gray-600 mb-1">
-                                                                {service.titleEn}
+                                                                {service.title}
                                                             </p>
                                                             <p className="text-lg font-black text-red-600">
                                                                 ${service.price}
@@ -1014,13 +999,13 @@ export default function ServiceRedesigned() {
                                             <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 mb-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div>
-                                                        <p className="text-gray-400 text-sm mb-1">សេវាកម្មដែលបានជ្រើសរើស</p>
+                                                        <p className="text-gray-400 text-sm mb-1">{t('service.selectedServices')}</p>
                                                         <p className="text-white text-2xl font-black">
                                                             {selectedServices.length} services
                                                         </p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="text-gray-400 text-sm mb-1">តម្លៃសរុប</p>
+                                                        <p className="text-gray-400 text-sm mb-1">{t('service.totalPrice')}</p>
                                                         <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
                                                             ${calculateTotal()}
                                                         </p>
@@ -1031,7 +1016,7 @@ export default function ServiceRedesigned() {
                                             {/* Book Button */}
                                             <button onClick={handleProceedToBooking} className="btn-3d w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-5 rounded-xl font-black text-lg shadow-2xl flex items-center justify-center gap-3">
                                                 <Calendar className="w-6 h-6" />
-                                                កក់ពេលវេលា
+                                                {t('service.bookNow')}
                                                 <ArrowRight className="w-6 h-6" />
                                             </button>
                                         </div>
@@ -1048,12 +1033,12 @@ export default function ServiceRedesigned() {
                         <section>
                             <div className="text-center mb-12">
                                 <div className="inline-block px-6 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mb-4">
-                                    <span className="text-purple-600 font-bold text-sm">ផលិតផលគុណភាពខ្ពស់</span>
+                                    <span className="text-purple-600 font-bold text-sm">{t('service.products.badge')}</span>
                                 </div>
                                 <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-                                    ផលិតផលទាំងអស់
+                                    {t('service.products.title')}
                                 </h2>
-                                <p className="text-xl text-gray-600">រកឃើញផលិតផលដែលសមស្របនឹងរថយន្តរបស់អ្នក</p>
+                                <p className="text-xl text-gray-600">{t('service.products.subtitle')}</p>
                             </div>
 
                             {loading ? (
@@ -1143,23 +1128,23 @@ export default function ServiceRedesigned() {
 
                 <div className="relative max-w-7xl mx-auto px-4 text-center">
                     <div className="inline-block px-6 py-2 bg-white/20 backdrop-blur-md rounded-full mb-6">
-                        <span className="text-sm font-bold">💬 ទាក់ទងមកយើងខ្ញុំ</span>
+                        <span className="text-sm font-bold">{t('service.contact.badge')}</span>
                     </div>
                     <h2 className="text-3xl md:text-5xl font-black mb-4">
-                        រកមិនឃើញសេវាកម្មដែលអ្នកត្រូវការទេ?
+                        {t('service.contact.title')}
                     </h2>
                     <p className="text-xl md:text-2xl mb-10 opacity-95 max-w-2xl mx-auto font-medium">
-                        ទាក់ទងមកយើងខ្ញុំដើម្បីទទួលបានប្រឹក្សាយោបល់ និងដំណោះស្រាយពិសេសសម្រាប់អ្នក
+                        {t('service.contact.subtitle')}
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <button className="btn-3d bg-white text-[#DC2626] px-10 py-5 rounded-2xl font-black text-lg hover:bg-gray-100 shadow-2xl flex items-center gap-3 group">
                             <MapPin className="w-6 h-6" />
-                            ទាក់ទងមកយើងខ្ញុំ
+                            {t('service.contact.button')}
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </button>
                         <button className="btn-3d bg-white/10 backdrop-blur-md border-2 border-white/30 text-white px-10 py-5 rounded-2xl font-black text-lg hover:bg-white/20 flex items-center gap-3">
                             <Calendar className="w-6 h-6" />
-                            កក់ពេលវេលា
+                            {t('service.bookNow')}
                         </button>
                     </div>
                 </div>

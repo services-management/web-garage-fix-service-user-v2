@@ -1,0 +1,362 @@
+{
+  "metadata": {
+    "title": "MR.LUBE - Car Care Services",
+    "description": "High-quality car maintenance services"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "contact": "Contact",
+    "aboutUs": "About Us",
+    "login": "Login"
+  },
+  "home": {
+    "hero": {
+      "title": "Welcome to MR.LUBE - Our Company",
+      "subtitle": "We provide all types of car care services with modern technology",
+      "cta": "Learn More"
+    },
+    "whyChoose": {
+      "title": "Why Choose MR.LUBE",
+      "subtitle": "MR.LUBE provides high-quality services to ensure your car runs at its best",
+      "features": {
+        "fastService": {
+          "title": "Fast & Satisfying Service",
+          "description": "Easy booking and quick service without long waits."
+        },
+        "experts": {
+          "title": "Experienced Experts",
+          "description": "Highly skilled team with years of experience."
+        },
+        "price": {
+          "title": "Affordable Prices",
+          "description": "Fair prices with full transparency."
+        },
+        "quality": {
+          "title": "Quality",
+          "description": "We only use original and high-quality products."
+        }
+      }
+    },
+    "popularServices": {
+      "title": "Popular Services"
+    },
+    "findUs": {
+      "title": "Find Us",
+      "address": {
+        "title": "Address",
+        "value": "Street 60m, Sangkat Teuk Thla, Khan Sen Sok, Phnom Penh, Kingdom of Cambodia",
+        "viewMap": "View Map"
+      },
+      "phone": {
+        "title": "Phone",
+        "contactUs": "Contact us anytime",
+        "callNow": "Call Now"
+      },
+      "hours": {
+        "title": "Working Hours",
+        "weekdays": "Mon-Fri",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "time": "7:30 - 5:00"
+      }
+    },
+    "ctaSection": {
+      "title": "Ready for an Appointment?",
+      "subtitle": "Contact us now or visit us to get high-quality services",
+      "callNow": "Call Now",
+      "viewLocation": "View Location"
+    }
+  },
+  "services": {
+    "oilChange": "Premium Oil Change",
+    "oilChangeDesc": "High-quality oil",
+    "brakeCleaning": "Brake Cleaning",
+    "brakeCleaningDesc": "Brake system cleaning",
+    "engineCheck": "Engine Check",
+    "engineCheckDesc": "Engine inspection"
+  },
+  "service": {
+    "tabs": {
+      "oilHome": "Booking service Oil Change at Home",
+      "oilGarage": "Booking service Oil Change at Garage",
+      "products": "Order Products"
+    },
+    "pageTitles": {
+      "oilHome": "Service at Home",
+      "oilGarage": "Service at Garage",
+      "products": "Order Products"
+    },
+    "banner": {
+      "homeServiceTitle": "Service at Your Home",
+      "garageServiceTitle": "Service at Our Garage",
+      "homeServiceDesc": "We come to your home to provide high-quality service by experienced professionals",
+      "garageServiceDesc": "Visit our garage to get the best service with modern equipment",
+      "feature1": "Professional Expertise",
+      "feature2": "Fast Service",
+      "feature3": "Quality Guaranteed",
+      "qualityTitle": "100% Quality Guaranteed",
+      "qualityDesc": "Using high-quality engine oil Castrol / Mobil 1 with expert techniques, 6 months or 10,000 km warranty",
+      "qualityFeature1": "Affordable Price",
+      "qualityFeature2": "6 Month Warranty",
+      "qualityFeature3": "Quality Oil",
+      "fastTitle": "Fast Service 30 Minutes",
+      "fastDesc": "Complete oil change in just 30-45 minutes including professional inspection",
+      "fastFeature1": "Easy",
+      "fastFeature2": "Time Saving",
+      "fastFeature3": "No Long Wait",
+      "discountTitle": "Special Discount",
+      "discountDesc": "Get 20% discount for first booking and free additional services",
+      "discountFeature1": "20% Off",
+      "discountFeature2": "Free Inspection",
+      "discountFeature3": "Join Special Club"
+    },
+    "carFilter": {
+      "carMake": "Car Make",
+      "selectCarMake": "Select Car Make",
+      "year": "Year",
+      "selectYear": "Select Year",
+      "model": "Model/Series",
+      "selectModel": "Select Model",
+      "fuelType": "Fuel Type",
+      "selectFuelType": "Select Fuel Type",
+      "engine": "Engine",
+      "selectEngine": "Select Engine",
+      "yourCar": "✅ Your Car"
+    },
+    "serviceOptions": {
+      "engineOil": "Engine Oil 5W-40",
+      "transmissionFluid": "Transmission Fluid (Dexron iii)",
+      "engineFlush": "Engine Flush",
+      "brakeFluid": "Brake Fluid Dot3/Dot4",
+      "coolant": "Coolant",
+      "airCondition": "Air Condition -45C°"
+    },
+    "required": "Required",
+    "hero": {
+      "title": "Services",
+      "subtitle": "Car Care",
+      "description": "Choose the most suitable service for your car with expert techniques and high quality",
+      "searchButton": "Search Services",
+      "happyCustomers": "Happy Customers",
+      "services": "Services",
+      "support": "Support"
+    },
+    "carInfo": {
+      "title": "Select Car Information",
+      "subtitle": "Enter your car information to get suitable services"
+    },
+    "step2": {
+      "badge": "Step 2",
+      "title": "Select Services",
+      "subtitle": "Choose the services you need for your car"
+    },
+    "package": {
+      "title": "Oil Change Service",
+      "subtitle": "Oil Change Service Package",
+      "selectService": "Select Service"
+    },
+    "selectedServices": "Selected Services",
+    "totalPrice": "Total Price",
+    "bookNow": "Book Now",
+    "products": {
+      "badge": "Premium Quality Products",
+      "title": "All Products",
+      "subtitle": "Find products suitable for your car"
+    },
+    "contact": {
+      "badge": "💬 Contact Us",
+      "title": "Can't find the service you need?",
+      "subtitle": "Contact us for consultation and special solutions for you",
+      "button": "Contact Us"
+    }
+  },
+  "about": {
+    "title": "About Mr.LUBE",
+    "description": "Mr.LUBE Company was established to help citizens who have difficulty finding repair shops and lack time to find mechanics. Our main goal is to provide quality and trustworthy vehicle care services. Currently, we have created the Mr.LUBE website to help parents and siblings with their car maintenance issues.",
+    "mainService": "Our most important service is the Oil Change service, which uses high-quality products with international standards. Our team of expert mechanics ensures that the oil change will make the engine run better, smoother, and last longer.",
+    "otherServices": "In addition, Mr.LUBE also provides other services such as:",
+    "whyChooseTitle": "Why Choose MR.LUBE",
+    "whyChooseSubtitle": "MR.LUBE provides high-quality services to ensure your car runs at its best",
+    "whyChoose": {
+      "fastService": "Fast & Satisfying Service",
+      "fastServiceDesc": "Easy booking and quick service without long waits.",
+      "experts": "Experienced Experts",
+      "expertsDesc": "Highly skilled team with years of experience.",
+      "price": "Affordable Prices",
+      "priceDesc": "Fair prices with full transparency.",
+      "quality": "Quality",
+      "qualityDesc": "We only use original and high-quality products."
+    },
+    "serviceList": [
+      "Inspection and replacement of Air Filter and Oil Filter",
+      "Coolant Flush and cooling system cleaning",
+      "Brake inspection, brake fluid change, and brake system maintenance",
+      "Battery and electrical system inspection",
+      "Interior cleaning and car window wiping"
+    ],
+    "mission": "Mr.LUBE always focuses on fast, satisfying, and efficient service to ensure customers have the best car care experience.",
+    "missionTitle": "Fulfilling Our Mission with Quality and Trust",
+    "missionSubtitle": "We are committed to providing high-quality vehicle care services, meeting customer needs, and creating a new car care experience.",
+    "cards": {
+      "oilChange": {
+        "title": "Oil Change Service",
+        "description": "Providing oil change services with high-quality products and ensuring the engine runs well with safety."
+      },
+      "maintenance": {
+        "title": "Complete Car System Maintenance",
+        "description": "Inspect air filters, change coolant, change brake fluid, and maintain electrical systems to keep the car in the best condition."
+      },
+      "customerService": {
+        "title": "Reliable Customer Service",
+        "description": "Our team is always friendly, provides personalized service, and offers advice to customers to ensure the best experience."
+      }
+    },
+    "learnMore": "Learn more about our services →"
+  },
+  "booking": {
+    "title": "Booking - MR.LUBE",
+    "backButton": "← Back",
+    "stepper": {
+      "step1": "Personal Info",
+      "step2": "Select Service",
+      "step3": "Confirmation"
+    },
+    "step1": {
+      "title": "Personal Information",
+      "subtitle": "Fill in your information to continue",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "phone": "Phone Number",
+      "phonePlaceholder": "Enter phone number",
+      "carMake": "Car Make",
+      "carMakePlaceholder": "Select car make",
+      "carModel": "Car Model",
+      "carModelPlaceholder": "Enter car model",
+      "serviceLocation": "Service Location",
+      "homeService": "Home Service",
+      "garageService": "Garage Service",
+      "address": "Address",
+      "district": "District",
+      "selectDistrict": "Select district",
+      "commune": "Commune",
+      "street": "Street",
+      "streetPlaceholder": "e.g., St. 51, House 123",
+      "locationNote": "Location Note",
+      "locationNotePlaceholder": "Enter location note (optional)",
+      "nextButton": "Continue",
+      "personalInfoTitle": "Personal Information",
+      "appointmentTitle": "Appointment Time",
+      "date": "Date",
+      "time": "Time",
+      "addressTitle": "Home Address",
+      "required": "Required",
+      "communePlaceholder": "e.g., Tonle Bassac Commune",
+      "landmark": "Landmark (Optional)",
+      "landmarkPlaceholder": "e.g., Near ABA Bank, beside Chip Mong",
+      "selectOnMap": "Select location on map",
+      "continueButton": "Continue to next step"
+    },
+    "step2": {
+      "title": "Confirm Services",
+      "subtitle": "Your selected services + optional add-ons",
+      "selectedServicesTitle": "Selected Services",
+      "noServicesSelected": "No services selected",
+      "addExtraServices": "Add Extra Services",
+      "contactTitle": "Contact Information",
+      "addressLabel": "Address",
+      "phoneLabel": "Phone",
+      "contactPersonLabel": "Contact Person",
+      "openingHoursLabel": "Opening Hours",
+      "noteTitle": "Notes",
+      "notePlaceholder": "Please enter your notes...",
+      "summary": "Summary",
+      "servicesCount": "services",
+      "totalPrice": "Total Price",
+      "backButton": "Back",
+      "nextButton": "Continue"
+    },
+    "step3": {
+      "title": "Confirm Booking",
+      "subtitle": "Review your information before submitting",
+      "personalInfo": "Personal Information",
+      "serviceDetails": "Service Details",
+      "dateTime": "Date & Time",
+      "location": "Location",
+      "items": "Selected Items",
+      "total": "Total",
+      "ready": "Ready!",
+      "readyMessage": "You have successfully filled in all information",
+      "backButton": "Back",
+      "submitButton": "Submit Booking",
+      "checkInfo": "Please check your information again before confirming",
+      "appointmentNumber": "Appointment Number",
+      "personalInfoSection": "Personal Information",
+      "serviceDetailsSection": "Service Details",
+      "dateTimeSection": "Date & Time",
+      "locationSection": "Location",
+      "noteSection": "Notes",
+      "servicesSection": "Services",
+      "totalSection": "Total",
+      "confirmButton": "Confirm Booking"
+    },
+    "success": "Your booking has been submitted successfully!",
+    "serviceOptions": {
+      "engineOil": "Engine Oil 5W-40",
+      "transmissionFluid": "Transmission Fluid (Dexron iii)",
+      "engineFlush": "Engine Flush",
+      "brakeFluid": "Brake Fluid Dot3/Dot4",
+      "coolant": "Coolant",
+      "airCondition": "Air Condition -45C°"
+    },
+    "districts": {
+      "daunPenh": "Daun Penh",
+      "makara": "7 Makara",
+      "chamkarmon": "Chamkarmon",
+      "toulKork": "Toul Kork",
+      "bkk": "BKK",
+      "meanChey": "Mean Chey",
+      "posenchey": "Posenchey",
+      "chbarAmpov": "Chbar Ampov",
+      "russeyKeo": "Russey Keo",
+      "senSok": "Sen Sok",
+      "ponnheaLeu": "Ponnhea Leu",
+      "dangkao": "Dangkao"
+    }
+  },
+  "contact": {
+    "title": "Ready for an Appointment?",
+    "subtitle": "Contact us now or visit us to get high-quality services",
+    "callNow": "Call Now",
+    "form": {
+      "title": "Write Your Message Here",
+      "name": "Your Full Name",
+      "namePlaceholder": "Your full name",
+      "phone": "Phone Number",
+      "phonePlaceholder": "Phone number",
+      "message": "Your Message",
+      "messagePlaceholder": "Your message...",
+      "submit": "Send"
+    },
+    "findUs": "Find Us",
+    "location": {
+      "title": "Location",
+      "subtitle": "We are here to help you"
+    }
+  },
+  "login": {
+    "title": "Login to Your Account",
+    "subtitle": "Enter your email and password.",
+    "phone": "Phone Number",
+    "password": "Password",
+    "submit": "Login",
+    "backToHome": "Back to Home"
+  },
+  "common": {
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "duration": "Duration",
+    "bookings": "Bookings",
+    "min": "min"
+  }
+}

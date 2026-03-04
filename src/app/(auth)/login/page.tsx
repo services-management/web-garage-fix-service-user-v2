@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
+  const t = useTranslations('login');
+
   return (
     <div className="flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
@@ -9,17 +14,17 @@ export default function LoginPage() {
         </div>
 
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          ចូលទៅគណនីរបស់អ្នក
+          {t('title')}
         </h1>
         <p className="text-center text-gray-600 text-sm mb-8">
-          បញ្ចូលអ៊ីមែល និងពាក្យសម្ងាត់របស់អ្នក។
+          {t('subtitle')}
         </p>
 
         <form className="space-y-4">
           <div>
             <input
               type="text"
-              placeholder="លេខទូរស៍ព្ទ"
+              placeholder={t('phone')}
               className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B84641] focus:border-transparent text-gray-700 placeholder-gray-400"
             />
           </div>
@@ -27,7 +32,7 @@ export default function LoginPage() {
           <div>
             <input
               type="password"
-              placeholder="ពាក្យសម្ងាត់"
+              placeholder={t('password')}
               className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B84641] focus:border-transparent text-gray-700 placeholder-gray-400"
             />
           </div>
@@ -36,13 +41,13 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-[#B84641] text-white font-semibold py-3 rounded-md hover:bg-[#9d3a36] transition-colors duration-200 shadow-md"
           >
-            ចូលគណនី
+            {t('submit')}
           </button>
         </form>
 
         <div className="mt-6 flex items-center justify-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Link href="/" className="text-[#4285F4] text-sm hover:underline">ទៅទំព័រដើម</Link>
+            <Link href="/" className="text-[#4285F4] text-sm hover:underline">{t('backToHome')}</Link>
           </div>
         </div>
 

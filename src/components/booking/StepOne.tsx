@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   User, Calendar, MapPin, Home, Building2,
   ChevronRight, Navigation, AlertCircle,
@@ -15,19 +16,19 @@ interface StepOneProps {
   serviceType?: 'oil-home' | 'oil-garage' | 'products'; // ← from BookingClient
 }
 
-const DISTRICTS = [
-  'ដូនពេញ (Daun Penh)',
-  '7មករា (7 Makara)',
-  'ចំការមន (Chamkarmon)',
-  'ទួលគោក (Toul Kork)',
-  'បឹងកេងកង (BKK)',
-  'មានជ័យ (Mean Chey)',
-  'ពោធិ៍សែនជ័យ (Posenchey)',
-  'ច្បារអំពៅ (Chbar Ampov)',
-  'ឫស្សីកែវ (Russey Keo)',
-  'សែនសុខ (Sen Sok)',
-  'ពន្លឺ (Ponnhea Leu)',
-  'ដង្កោ (Dangkao)',
+const getDistricts = (t: any) => [
+  t('districts.daunPenh'),
+  t('districts.makara'),
+  t('districts.chamkarmon'),
+  t('districts.toulKork'),
+  t('districts.bkk'),
+  t('districts.meanChey'),
+  t('districts.posenchey'),
+  t('districts.chbarAmpov'),
+  t('districts.russeyKeo'),
+  t('districts.senSok'),
+  t('districts.ponnheaLeu'),
+  t('districts.dangkao'),
 ];
 
 export default function StepOne({
@@ -36,7 +37,9 @@ export default function StepOne({
   onNext,
   serviceType = 'oil-garage',
 }: StepOneProps) {
+  const t = useTranslations('booking');
   const [errors, setErrors] = useState<any>({});
+  const DISTRICTS = getDistricts(t);
 
   // true  → user booked from "oil-home" tab  → show address fields
   // false → user booked from "oil-garage" tab → hide address fields
@@ -106,38 +109,35 @@ export default function StepOne({
           : 'bg-purple-50 text-purple-700 border-purple-200'
         }`}>
         {isHome
-          ? <><Home className="w-3.5 h-3.5" /> សេវាកម្មនៅផ្ទះ</>
-          : <><Building2 className="w-3.5 h-3.5" /> សេវាកម្មនៅហាង</>
+          ? <><Home className="w-3.5 h-3.5" /> {t('step1.homeService')}</>
+          : <><Building2 className="w-3.5 h-3.5" /> {t('step1.garageService')}</>
         }
       </div>
 
-      <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-1">ព័ត៌មានការកក់</h2>
+      <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-1">{t('step1.title')}</h2>
       <p className="text-gray-400 text-xs sm:text-sm mb-6">
-        {isHome
-          ? 'យើងនឹងមកផ្ទះអ្នក — សូមបញ្ចូលព័ត៌មានអោយបានត្រូវ'
-          : 'ចូលមកហាងរបស់យើង — ទទួលសេវាកម្មភ្លាមៗ'
-        }
+        {t('step1.subtitle')}
       </p>
 
       <div className="space-y-4">
 
         {/* ── Personal Info ── */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-5 shadow-sm">
-          <SectionHead icon={User} text="ព័ត៌មានផ្ទាល់ខ្លួន" />
+          <SectionHead icon={User} text={t('step1.personalInfoTitle')} />
           <div className="space-y-3">
             <div>
-              <Label text="ឈ្មោះពេញ *" />
+              <Label text={`${t('step1.fullName')} *`} />
               <input
                 type="text"
                 value={formData.full_name || ''}
                 onChange={e => setFormData({ ...formData, full_name: e.target.value })}
                 className={inp(!!errors.full_name)}
-                placeholder="ឧ. សុខ ដារ៉ា"
+                placeholder={t('step1.fullNamePlaceholder')}
               />
               <Err msg={errors.full_name} />
             </div>
             <div>
-              <Label text="លេខទូរស័ព្ទ *" />
+              <Label text={`${t('step1.phone')} *`} />
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-xs font-semibold pointer-events-none">
                   +855
@@ -147,7 +147,7 @@ export default function StepOne({
                   value={formData.phone || ''}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   className={`${inp(!!errors.phone)} pl-12`}
-                  placeholder="010 635 568"
+                  placeholder={t('step1.phonePlaceholder')}
                 />
               </div>
               <Err msg={errors.phone} />
@@ -157,10 +157,10 @@ export default function StepOne({
 
         {/* ── Appointment ── */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-5 shadow-sm">
-          <SectionHead icon={Calendar} text="ពេលវេលាណាត់ជួប" />
+          <SectionHead icon={Calendar} text={t('step1.appointmentTitle')} />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label text="កាលបរិច្ឆេទ *" />
+              <Label text={`${t('step1.date')} *`} />
               <input
                 type="date"
                 value={formData.appointment_date || ''}
@@ -171,7 +171,7 @@ export default function StepOne({
               <Err msg={errors.appointment_date} />
             </div>
             <div>
-              <Label text="ម៉ោង *" />
+              <Label text={`${t('step1.time')} *`} />
               <input
                 type="time"
                 value={formData.start_time || ''}
@@ -188,22 +188,22 @@ export default function StepOne({
           <div className="bg-blue-50 rounded-2xl border-2 border-blue-200 p-4 sm:p-5 shadow-sm">
             <SectionHead
               icon={Navigation}
-              text="អាស័យដ្ឋានផ្ទះ"
+              text={t('step1.addressTitle')}
               color="bg-blue-600"
-              badge="ចាំបាច់"
+              badge={t('step1.required')}
             />
             <div className="space-y-3">
 
               {/* District dropdown */}
               <div>
-                <Label text="ខណ្ឌ/ស្រុក *" />
+                <Label text={`${t('step1.district')} *`} />
                 <div className="relative">
                   <select
                     value={formData.district || ''}
                     onChange={e => setFormData({ ...formData, district: e.target.value })}
                     className={`${inp(!!errors.district)} bg-white appearance-none pr-8`}
                   >
-                    <option value="">ជ្រើសរើសខណ្ឌ</option>
+                    <option value="">{t('step1.selectDistrict')}</option>
                     {DISTRICTS.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
@@ -215,38 +215,38 @@ export default function StepOne({
 
               {/* Sangkat / Village — user types freely */}
               <div>
-                <Label text="សង្កាត់/ភូមិ" />
+                <Label text={t('step1.commune')} />
                 <input
                   type="text"
                   value={formData.commune || ''}
                   onChange={e => setFormData({ ...formData, commune: e.target.value })}
                   className={`${inp(false)} bg-white`}
-                  placeholder="ឧ. សង្កាត់ទន្លេបាសាក់"
+                  placeholder={t('step1.communePlaceholder')}
                 />
               </div>
 
               {/* Street / House number — user types freely */}
               <div>
-                <Label text="ផ្លូវ / លេខផ្ទះ *" />
+                <Label text={`${t('step1.street')} *`} />
                 <input
                   type="text"
                   value={formData.street || ''}
                   onChange={e => setFormData({ ...formData, street: e.target.value })}
                   className={`${inp(!!errors.street)} bg-white`}
-                  placeholder="ឧ. ផ្លូវ 51 ផ្ទះលេខ 123"
+                  placeholder={t('step1.streetPlaceholder')}
                 />
                 <Err msg={errors.street} />
               </div>
 
               {/* Landmark — user types freely */}
               <div>
-                <Label text="ចំណុចសំគាល់ (Optional)" />
+                <Label text={t('step1.landmark')} />
                 <input
                   type="text"
                   value={formData.location_note || ''}
                   onChange={e => setFormData({ ...formData, location_note: e.target.value })}
                   className={`${inp(false)} bg-white`}
-                  placeholder="ឧ. ជាប់ ABA Bank, ក្បែរ Chip Mong"
+                  placeholder={t('step1.landmarkPlaceholder')}
                 />
               </div>
 
@@ -259,7 +259,7 @@ export default function StepOne({
                                     hover:bg-blue-100 transition-all"
               >
                 <MapPin className="w-3.5 h-3.5" />
-                ជ្រើសរើសទីតាំងនៅលើផែនទី
+                {t('step1.selectOnMap')}
               </button>
             </div>
           </div>
@@ -274,7 +274,7 @@ export default function StepOne({
                         hover:shadow-red-400/40 hover:scale-[1.02] active:scale-[0.98]
                         transition-all duration-200"
         >
-          បន្តទៅជំហានបន្ទាប់
+          {t('step1.continueButton')}
           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
 

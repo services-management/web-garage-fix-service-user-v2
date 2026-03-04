@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   MapPin, Phone, User, Clock, StickyNote,
   CheckCircle2, ChevronLeft, ChevronRight, Wrench, Plus
@@ -13,24 +14,27 @@ interface StepTwoProps {
   onBack: () => void;
 }
 
-// All available extra services user can add
-const ALL_SERVICES = [
-  { id: 1, name: 'ប្រេងម៉ាស៊ីន 5W-40', nameEn: 'Engine Oil 5W-40', price: 55 },
-  { id: 2, name: 'ប្រេងប្រអប់លេខ (Dexron iii)', nameEn: 'Transmission Fluid', price: 60 },
-  { id: 3, name: 'ថ្នាំសម្អាតម៉ាស៊ីន', nameEn: 'Engine Flush', price: 13 },
-  { id: 4, name: 'ប្រេងហ្រ៊ែម Dot3/Dot4', nameEn: 'Brake Fluid', price: 15 },
-  { id: 5, name: 'ទឹកក្រោស', nameEn: 'Coolant', price: 45 },
-  { id: 6, name: 'ទឹកម៉ាស៊ីនត្រជាក់', nameEn: 'Air Condition Fluid', price: 35 },
+// All available extra services user can add - names will be translated
+const getAllServices = (t: any) => [
+  { id: 1, name: t('serviceOptions.engineOil'), price: 55 },
+  { id: 2, name: t('serviceOptions.transmissionFluid'), price: 60 },
+  { id: 3, name: t('serviceOptions.engineFlush'), price: 13 },
+  { id: 4, name: t('serviceOptions.brakeFluid'), price: 15 },
+  { id: 5, name: t('serviceOptions.coolant'), price: 45 },
+  { id: 6, name: t('serviceOptions.airCondition'), price: 35 },
 ];
 
-const CONTACTS = [
-  { icon: MapPin, label: 'អាស័យដ្ឋាន', value: 'ផ្លូវ 271 ខណ្ឌទួលគោក ភ្នំពេញ' },
-  { icon: Phone, label: 'ទូរស័ព្ទ', value: '010-635-568' },
-  { icon: User, label: 'អ្នកទទួលខុសត្រូវ', value: 'Kona, SPK-Bonna' },
-  { icon: Clock, label: 'ម៉ោងបើក', value: 'ច័ន្ទ–សៅរ៍ · 7:30–18:00' },
+const getContacts = (t: any) => [
+  { icon: MapPin, label: t('step2.addressLabel'), value: 'Street 271, Toul Kork, Phnom Penh' },
+  { icon: Phone, label: t('step2.phoneLabel'), value: '010-635-568' },
+  { icon: User, label: t('step2.contactPersonLabel'), value: 'Kona, SPK-Bonna' },
+  { icon: Clock, label: t('step2.openingHoursLabel'), value: 'Mon-Sat · 7:30-18:00' },
 ];
 
 export default function StepTwo({ formData, setFormData, onNext, onBack }: StepTwoProps) {
+  const t = useTranslations('booking');
+  const ALL_SERVICES = getAllServices(t);
+  const CONTACTS = getContacts(t);
   const items: any[] = formData.items || [];
 
   // ── Helper: check if a service_id is already in items ──
@@ -72,19 +76,19 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
 
   return (
     <div className="w-full max-w-2xl mx-auto px-4 sm:px-0">
-      <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-1">បញ្ជាក់សេវាកម្ម</h2>
+      <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-1">{t('step2.title')}</h2>
       <p className="text-gray-400 text-xs sm:text-sm mb-6">
-        សេវាកម្មដែលអ្នកបានជ្រើស + អាចបន្ថែមសេវាបន្ថែម
+        {t('step2.subtitle')}
       </p>
 
       <div className="space-y-4">
 
         {/* ── Pre-selected services from service page ── */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-5 shadow-sm">
-          <SectionHead icon={Wrench} text="សេវាកម្មដែលបានជ្រើស" color="bg-green-500" />
+          <SectionHead icon={Wrench} text={t('step2.selectedServicesTitle')} color="bg-green-500" />
 
           {preSelected.length === 0 ? (
-            <p className="text-gray-400 text-xs text-center py-4">មិនមានសេវាកម្មត្រូវបានជ្រើស</p>
+            <p className="text-gray-400 text-xs text-center py-4">{t('step2.noServicesSelected')}</p>
           ) : (
             <div className="space-y-2">
               {preSelected.map((svc, i) => (
@@ -99,7 +103,6 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
 
                   <div className="flex-1 min-w-0">
                     <p className="font-black text-gray-900 text-xs sm:text-sm leading-tight">{svc.name}</p>
-                    <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">{svc.nameEn}</p>
                   </div>
 
                   <span className="font-black text-green-600 text-sm flex-shrink-0">${svc.price}</span>
@@ -114,7 +117,7 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
           <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-5 shadow-sm">
             <SectionHead
               icon={Plus}
-              text="បន្ថែមសេវាកម្មបន្ថែម"
+              text={t('step2.addExtraServices')}
               right={<span className="text-[10px] text-gray-400 font-medium">Optional</span>}
             />
             <div className="space-y-2">
@@ -141,7 +144,6 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
 
                     <div className="flex-1 min-w-0">
                       <p className="font-black text-gray-900 text-xs sm:text-sm leading-tight">{svc.name}</p>
-                      <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">{svc.nameEn}</p>
                     </div>
 
                     <span className={`font-black text-sm flex-shrink-0 ${added ? 'text-green-600' : 'text-[#DC2626]'}`}>
@@ -162,7 +164,7 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
 
         {/* ── Contact info ── */}
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-5 shadow-sm">
-          <SectionHead icon={Phone} text="ការទំនាក់ទំនង" />
+          <SectionHead icon={Phone} text={t('step2.contactTitle')} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {CONTACTS.map((c, i) => (
               <div key={i} className="flex items-start gap-2.5 p-2.5 bg-red-50 rounded-xl border border-red-100">
@@ -182,7 +184,7 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
         <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 sm:p-5 shadow-sm">
           <SectionHead
             icon={StickyNote}
-            text="កំណត់ចំណាំ"
+            text={t('step2.noteTitle')}
             right={<span className="text-[10px] text-gray-400 font-medium">Optional</span>}
           />
           <textarea
@@ -192,13 +194,13 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
                             font-medium text-gray-900 resize-none
                             focus:outline-none focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-50 transition-all"
             rows={3}
-            placeholder="សូមបញ្ចូលកំណត់ចំណាំរបស់អ្នក..."
+            placeholder={t('step2.notePlaceholder')}
           />
         </div>
 
         {/* ── Summary ── */}
         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 sm:p-5 shadow-xl">
-          <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-3">សេចក្តីសង្ខេប</p>
+          <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-3">{t('step2.summary')}</p>
           <div className="space-y-1.5 mb-3">
             {ALL_SERVICES.filter(s => isInItems(s.id)).map(s => (
               <div key={s.id} className="flex items-center justify-between gap-2">
@@ -210,9 +212,9 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
           <div className="border-t border-gray-700 pt-3 flex items-center justify-between">
             <div>
               <p className="text-gray-400 text-[10px] mb-0.5">
-                {ALL_SERVICES.filter(s => isInItems(s.id)).length} សេវាកម្ម
+                {ALL_SERVICES.filter(s => isInItems(s.id)).length} {t('step2.servicesCount')}
               </p>
-              <p className="text-white font-black text-xs sm:text-sm">តម្លៃសរុប</p>
+              <p className="text-white font-black text-xs sm:text-sm">{t('step2.totalPrice')}</p>
             </div>
             <p className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
               ${total}
@@ -227,7 +229,7 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
             className="flex items-center justify-center gap-1.5 px-4 sm:px-5 py-3.5 bg-gray-100 text-gray-700
                             font-black text-xs sm:text-sm rounded-xl hover:bg-gray-200 active:scale-95 transition-all"
           >
-            <ChevronLeft className="w-4 h-4" /> ថយក្រោយ
+            <ChevronLeft className="w-4 h-4" /> {t('step2.backButton')}
           </button>
           <button
             onClick={onNext}
@@ -236,7 +238,7 @@ export default function StepTwo({ formData, setFormData, onNext, onBack }: StepT
                             rounded-xl shadow-lg hover:shadow-red-400/40 hover:scale-[1.02] active:scale-[0.98]
                             transition-all duration-200"
           >
-            បន្តទៅជំហានបន្ទាប់
+            {t('step2.nextButton')}
             <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>

@@ -1,19 +1,21 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Check, User, Wrench, ClipboardCheck } from 'lucide-react';
 
 interface StepperProps {
   currentStep: number;
 }
 
-const steps = [
-  { number: 1, label: 'ព័ត៌មានការកក់', labelEn: 'Personal Info', icon: User },
-  { number: 2, label: 'ជ្រើសរើសសេវា', labelEn: 'Select Service', icon: Wrench },
-  { number: 3, label: 'បញ្ជាក់ការកក់', labelEn: 'Confirmation', icon: ClipboardCheck },
-];
-
 export default function Stepper({ currentStep }: StepperProps) {
+  const t = useTranslations('booking.stepper');
+
+  const steps = [
+    { number: 1, label: t('step1'), icon: User },
+    { number: 2, label: t('step2'), icon: Wrench },
+    { number: 3, label: t('step3'), icon: ClipboardCheck },
+  ];
   return (
     <div className="flex items-center justify-center w-full max-w-lg mx-auto py-4 px-2">
       {steps.map((step, index) => {
@@ -46,10 +48,6 @@ export default function Stepper({ currentStep }: StepperProps) {
                 <p className={`text-[10px] font-black leading-tight
                                     ${isActive ? 'text-[#DC2626]' : isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
                   {step.label}
-                </p>
-                <p className={`text-[9px] font-semibold hidden sm:block
-                                    ${isActive ? 'text-orange-400' : isCompleted ? 'text-green-400' : 'text-gray-300'}`}>
-                  {step.labelEn}
                 </p>
               </div>
             </div>
