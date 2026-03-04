@@ -1,12 +1,13 @@
-import { Metadata } from "next";
+'use client';
+
+import { useTranslations } from 'next-intl';
 import Image from "next/image"
 import Link from "next/link"
 
-export const metadata: Metadata = {
-  title: "Contact Us - MR.LUBE",
-};
-
 export default function Contact() {
+    const t = useTranslations('contact');
+    const homeT = useTranslations();
+
     return (
         <>
             {/* banner */}
@@ -21,13 +22,13 @@ export default function Contact() {
                     <div className="absolute inset-0 bg-black/70" />
                 </div>
 
-                {/* Content - REMOVED 'container' and 'mx-auto' for full width */}
+                {/* Content */}
                 <div className="relative px-4 h-full text-center pt-10">
                     <div className=" text-white">
-                        <h1 className="text-3xl font-bold mb-4 ">ត្រៀមខ្លួនសម្រាប់ការណាត់ជួប?</h1>
-                        <p className="text-lg mb-8 text-gray-200 text-pretty">ទាក់ទងមកយើងឥឡូវនេះ ឬមកទស្សនាយើងដើម្បីទទួលបានសេវាកម្មគុណភាពខ្ពស់</p>
+                        <h1 className="text-3xl font-bold mb-4 ">{t('title')}</h1>
+                        <p className="text-lg mb-8 text-gray-200 text-pretty">{t('subtitle')}</p>
                         <div className="flex justify-center gap-4">
-                            <Link href="" className="bg-red-700 hover:bg-white hover:text-red-700 text-white px-8 py-2 text-lg rounded-lg">ទូរស័ព្ទឥឡូវនេះ</Link>
+                            <Link href="" className="bg-red-700 hover:bg-white hover:text-red-700 text-white px-8 py-2 text-lg rounded-lg">{t('callNow')}</Link>
                         </div>
                     </div>
                 </div>
@@ -45,25 +46,25 @@ export default function Contact() {
                         <div className="flex flex-col w-full px-6 md:px-10 lg:px-6">
 
                             <form className="w-full max-w-md mx-auto">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center lg:text-left">សរសេរសាររបស់លោកអ្នកនៅទីនេះ</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center lg:text-left">{t('form.title')}</h2>
 
                                 <div className="mb-5">
-                                    <label htmlFor="email" className="block mb-2 text-lg font-bold text-gray-900 ">ឈ្មោះពេញរបស់អ្នក</label>
-                                    <input type="email" id="email" className="border w-full shadow-sm p-2.5 rounded-lg" placeholder="ឈ្មោះពេញរបស់អ្នក" />
+                                    <label htmlFor="email" className="block mb-2 text-lg font-bold text-gray-900 ">{t('form.name')}</label>
+                                    <input type="email" id="email" className="border w-full shadow-sm p-2.5 rounded-lg" placeholder={t('form.namePlaceholder')} />
                                 </div>
 
                                 <div className="mb-5">
-                                    <label htmlFor="phoneNumber" className="block mb-2 text-lg font-bold text-gray-900 ">លេខទូរស័ព្ទ</label>
-                                    <input type="text" id="phoneNumber" className="border w-full shadow-sm p-2.5 rounded-lg" placeholder="លេខទូរស័ព្ទ" />
+                                    <label htmlFor="phoneNumber" className="block mb-2 text-lg font-bold text-gray-900 ">{t('form.phone')}</label>
+                                    <input type="text" id="phoneNumber" className="border w-full shadow-sm p-2.5 rounded-lg" placeholder={t('form.phonePlaceholder')} />
                                 </div>
 
                                 <div className="mb-5">
-                                    <label htmlFor="message" className="block mb-2 text-lg font-bold text-gray-900 ">សាររបស់អ្នក</label>
-                                    <textarea id="message" rows={4} className="border w-full shadow-sm p-2.5 rounded-lg" placeholder="សាររបស់អ្នក..."></textarea>
+                                    <label htmlFor="message" className="block mb-2 text-lg font-bold text-gray-900 ">{t('form.message')}</label>
+                                    <textarea id="message" rows={4} className="border w-full shadow-sm p-2.5 rounded-lg" placeholder={t('form.messagePlaceholder')}></textarea>
                                 </div>
 
 
-                                <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">បញ្ចូន</button>
+                                <button type="submit" className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{t('form.submit')}</button>
                             </form>
 
                         </div>
@@ -73,7 +74,7 @@ export default function Contact() {
 
             {/* Way to Find us */}
             <section className="py-10">
-                <h1 className="text-3xl mb-3 font-bold text-center">ស្វែងរកពួកយើង</h1>
+                <h1 className="text-3xl mb-3 font-bold text-center">{t('findUs')}</h1>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
@@ -83,15 +84,15 @@ export default function Contact() {
                                     <i className="ri-map-pin-line text-white text-5xl"></i>
                                 </div>
                                 <span className="text-xl text-white font-medium">
-                                    អាស័យដ្ធាន
+                                    {homeT('home.findUs.address.title')}
                                 </span>
                             </div>
 
                             <div className="p-4">
                                 <h5 className="mb-2 text-slate-800 text-xl font-semibold">
-                                    ផ្លូវ៦០ម៉ែត្រ សង្កាត់ទឹកថ្លាខណ្ឌសែនសុខរាជធានីភ្នំពេញព្រះរាជាណាចក្រកម្ពុជា
+                                    {homeT('home.findUs.address.value')}
                                 </h5>
-                                <Link href="https://maps.app.goo.gl/rLnv5o5YP27BVQ7C6?g_st=com.google.maps.preview.copy" className="text-red-700 hover:text-red-800 ">មើលផែនទី<i className="ri-arrow-right-up-line"></i></Link>
+                                <Link href="https://maps.app.goo.gl/rLnv5o5YP27BVQ7C6?g_st=com.google.maps.preview.copy" className="text-red-700 hover:text-red-800 ">{homeT('home.findUs.address.viewMap')}<i className="ri-arrow-right-up-line"></i></Link>
                             </div>
                         </div>
 
@@ -102,7 +103,7 @@ export default function Contact() {
                                     <i className="ri-phone-line text-white text-5xl"></i>
                                 </div>
                                 <span className="text-xl text-white font-medium">
-                                    លេខទូរស័ព្ទ
+                                    {homeT('home.findUs.phone.title')}
                                 </span>
                             </div>
 
@@ -112,8 +113,8 @@ export default function Contact() {
                                     <p className="text-xl">+855 85 544 343</p>
                                 </div>
                                 <div className="flex justify-between py-3">
-                                    <p className="text-slate-400 text-lg pt-1">ទាក់ទងមកកាន់យើងគ្រប់ពេល</p>
-                                    <Link href="https://t.me/MrLube9" className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 text-lg rounded-sm">ទូរស័ព្ទឥឡូវនេះ</Link>
+                                    <p className="text-slate-400 text-lg pt-1">{homeT('home.findUs.phone.contactUs')}</p>
+                                    <Link href="https://t.me/MrLube9" className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 text-lg rounded-sm">{homeT('home.findUs.phone.callNow')}</Link>
                                 </div>
                             </div>
                         </div>
@@ -124,20 +125,20 @@ export default function Contact() {
                                     <i className="ri-time-line text-white text-5xl"></i>
                                 </div>
                                 <span className="text-xl text-white font-medium">
-                                    ម៉ោងធ្វើការ
+                                    {homeT('home.findUs.hours.title')}
                                 </span>
                             </div>
 
                             <div className="p-4">
                                 <div className="flex justify-between border-b border-slate-400 pb-2">
-                                    <p className="text-xl text-slate-400">ច័ន្ទ-សុក្រ</p>
-                                    <p className="text-xl">7:30 - 5:00</p>
+                                    <p className="text-xl text-slate-400">{homeT('home.findUs.hours.weekdays')}</p>
+                                    <p className="text-xl">{homeT('home.findUs.hours.time')}</p>
                                 </div>
                                 <div className="flex justify-between border-b border-slate-400 pb-2 pt-2">
-                                    <p className="text-xl text-slate-400">សៅរ៍</p>
-                                    <p className="text-xl">7:30 - 5:00</p>
+                                    <p className="text-xl text-slate-400">{homeT('home.findUs.hours.saturday')}</p>
+                                    <p className="text-xl">{homeT('home.findUs.hours.time')}</p>
                                 </div>
-                                <p className="text-xl text-slate-400 pt-2">អាទិត្យ</p>
+                                <p className="text-xl text-slate-400 pt-2">{homeT('home.findUs.hours.sunday')}</p>
                             </div>
                         </div>
                     </div>
@@ -150,10 +151,10 @@ export default function Contact() {
 
                     <div className="text-center mb-8 md:mb-12">
                         <h1 className="text-xl font-semibold text-gray-700 mb-2">
-                            ទីតាំង
+                            {t('location.title')}
                         </h1>
                         <p className="text-3xl md:text-4xl text-blue-700">
-                            ពួកយើងនៅទីនេះដើម្បីជួយលោកអ្នក
+                            {t('location.subtitle')}
                         </p>
                     </div>
 

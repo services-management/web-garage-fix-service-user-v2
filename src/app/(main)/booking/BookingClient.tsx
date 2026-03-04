@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import StepOne from '@/components/booking/StepOne';
 import StepTwo from '@/components/booking/StepTwo';
 import StepThree from '@/components/booking/StepThree';
 import Stepper from '@/components/booking/Stepper';
 
 export default function BookingClient() {
+    const t = useTranslations('booking');
 
     interface BookingItem {
         id: number;
@@ -167,7 +169,7 @@ export default function BookingClient() {
         console.log('Booking Data:', formData);
         // Clean up localStorage after booking
         localStorage.removeItem('bookingServiceType');
-        alert('ការកក់របស់អ្នកត្រូវបានដាក់ស្នើដោយជោគជ័យ!');
+        alert(t('success'));
     };
 
     return (
@@ -178,7 +180,7 @@ export default function BookingClient() {
                     onClick={() => router.back()}
                     className="mr-4 hover:opacity-80 bg-red-600 text-white px-3 py-1 rounded-sm"
                 >
-                    ← ត្រឡប់ក្រោយ
+                    {t('backButton')}
                 </button>
             </div>
 
