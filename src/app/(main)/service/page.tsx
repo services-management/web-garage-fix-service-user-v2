@@ -11,6 +11,19 @@ import {
 } from 'lucide-react';
 import ProductCard from '../../../components/service/productCard';
 import { getAllProducts } from '@/lib/api/product';
+import {
+    getAllMakes,
+    getModelsByMake,
+    getYearsByModel,
+    getVehicleConfigurations,
+    VehicleMake,
+    VehicleModel,
+    VehicleDetail,
+    getVehicleById,
+    getServiceEstimates,
+    ServiceEstimate,
+} from '@/lib/api/vehicle';
+import { getSlideshow, Slide } from '@/lib/api/slideshow';
 
 // Tab Configuration - will be translated in component
 const getTabs = (t: any) => [
@@ -34,87 +47,6 @@ const getTabs = (t: any) => [
     }
 ];
 
-// Car Makes
-const CAR_MAKES = [
-    'Toyota', 'Honda', 'Mazda', 'Ford', 'Chevrolet', 'Nissan', 'Hyundai',
-    'Kia', 'Mercedes-Benz', 'BMW', 'Audi', 'Lexus', 'Mitsubishi', 'Suzuki',
-    'Volkswagen', 'Subaru', 'Isuzu', 'Volvo', 'Land Rover', 'Jeep'
-];
-
-// Mock data for car models by make
-const CAR_MODELS: { [key: string]: string[] } = {
-    'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Prius', 'Tacoma', 'Tundra'],
-    'Honda': ['Accord', 'Civic', 'CR-V', 'Pilot', 'Odyssey', 'Fit', 'HR-V'],
-    'Mazda': ['Mazda3', 'Mazda6', 'CX-5', 'CX-9', 'CX-30', 'MX-5'],
-    'Default': ['Sedan', 'SUV', 'Truck', 'Hatchback', 'Coupe']
-};
-
-// Fuel Types
-const FUEL_TYPES = [
-    'Gasoline (Regular)',
-    'Gasoline (Premium)',
-    'Diesel',
-    'Hybrid',
-    'Electric',
-    'Plug-in Hybrid'
-];
-
-// Engine Types by Fuel
-const ENGINE_TYPES: { [key: string]: string[] } = {
-    'Gasoline (Regular)': ['1.5L 4-Cylinder', '2.0L 4-Cylinder', '2.5L 4-Cylinder', '3.5L V6'],
-    'Gasoline (Premium)': ['2.0L Turbo 4-Cylinder', '3.0L V6', '3.5L V6 Turbo', '5.0L V8'],
-    'Diesel': ['2.0L 4-Cylinder Diesel', '2.8L 4-Cylinder Diesel', '3.0L V6 Diesel'],
-    'Hybrid': ['1.8L Hybrid', '2.5L Hybrid'],
-    'Electric': ['Electric Motor'],
-    'Plug-in Hybrid': ['2.5L PHEV']
-};
-
-// Service Package Options - will be translated in component
-const getServiceOptions = (t: any) => [
-    {
-        id: 'engine-oil',
-        title: t('service.serviceOptions.engineOil'),
-        price: 55,
-        included: true,
-        required: true
-    },
-    {
-        id: 'transmission-fluid',
-        title: t('service.serviceOptions.transmissionFluid'),
-        price: 60,
-        included: false,
-        required: false
-    },
-    {
-        id: 'engine-flush',
-        title: t('service.serviceOptions.engineFlush'),
-        price: 13,
-        included: false,
-        required: false
-    },
-    {
-        id: 'brake-fluid',
-        title: t('service.serviceOptions.brakeFluid'),
-        price: 15,
-        included: false,
-        required: false
-    },
-    {
-        id: 'coolant',
-        title: t('service.serviceOptions.coolant'),
-        price: 45,
-        included: false,
-        required: false
-    },
-    {
-        id: 'air-condition',
-        title: t('service.serviceOptions.airCondition'),
-        price: 35,
-        included: false,
-        required: false
-    }
-];
-
 // Skeleton Loaders
 const ProductCardSkeleton = () => (
     <div className="bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse">
@@ -131,11 +63,15 @@ const ProductCardSkeleton = () => (
     </div>
 );
 
+const SelectSkeleton = () => (
+    <div className="w-full h-14 bg-gray-100 rounded-xl animate-pulse" />
+);
+
 export default function ServiceRedesigned() {
     const t = useTranslations();
     const TABS = getTabs(t);
-    const SERVICE_OPTIONS = getServiceOptions(t);
     const [activeTab, setActiveTab] = useState('oil-home');
+
     useEffect(() => {
         const pageTitleMap: Record<string, string> = {
             'oil-home': t('service.pageTitles.oilHome'),
@@ -145,180 +81,244 @@ export default function ServiceRedesigned() {
         const pageTitle = pageTitleMap[activeTab] || t('service.pageTitles.oilHome');
         document.title = `${pageTitle} - MR.LUBE`;
     }, [activeTab, t]);
+
     const router = useRouter();
 
-    // Car selection state
-    const [selectedMake, setSelectedMake] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
-    const [selectedModel, setSelectedModel] = useState('');
-    const [selectedFuelType, setSelectedFuelType] = useState('');
-    const [selectedEngine, setSelectedEngine] = useState('');
+    // ─── Vehicle filter state ───────────────────────────────────────────────
+    // Step 1 – Make
+    const [makes, setMakes] = useState<VehicleMake[]>([]);
+    const [makesLoading, setMakesLoading] = useState(false);
+    const [selectedMake, setSelectedMake] = useState<VehicleMake | null>(null);
+
+    // Step 2 – Model (fetched by make id)
+    const [models, setModels] = useState<VehicleModel[]>([]);
+    const [modelsLoading, setModelsLoading] = useState(false);
+    const [selectedModel, setSelectedModel] = useState<VehicleModel | null>(null);
+
+    // Step 3 – Year (fetched by model id)
+    const [years, setYears] = useState<number[]>([]);
+    const [yearsLoading, setYearsLoading] = useState(false);
+    const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+    // Step 4 – Configuration (fetched by model id + year)
+    const [configurations, setConfigurations] = useState<number[]>([]);
+    const [configurationsLoading, setConfigurationsLoading] = useState(false);
+    const [selectedConfiguration, setSelectedConfiguration] = useState<number | null>(null);
+
+    // Vehicle detail (fetched after configuration is selected)
+    const [vehicleDetail, setVehicleDetail] = useState<VehicleDetail | null>(null);
+    const [vehicleDetailLoading, setVehicleDetailLoading] = useState(false);
+
+    // Service estimates from API (fetched after vehicle + tab is known)
+    const [serviceEstimates, setServiceEstimates] = useState<ServiceEstimate[]>([]);
+    const [serviceEstimatesLoading, setServiceEstimatesLoading] = useState(false);
+    // Track which service_ids are selected (by service_id number)
+    const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>([]);
+    // ───────────────────────────────────────────────────────────────────────
 
     // Carousel state
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [slides, setSlides] = useState<any[]>([]);
+    const [slides, setSlides] = useState<Slide[]>([]);
     const [slidesLoading, setSlidesLoading] = useState(true);
 
     // Service selection state
-    const [selectedServices, setSelectedServices] = useState<string[]>(['engine-oil']);
 
     // Products state
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Generate years (current year back to 1990)
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: currentYear - 1989 }, (_, i) => currentYear - i);
-
-    // Check if oil change tabs - MUST be after activeTab is declared
     const isOilChangeTab = activeTab === 'oil-home' || activeTab === 'oil-garage';
 
-    // Total slides count
-    const totalSlides = slides.length || 3;
-
-    // Proceed to booking
+    // ─── Proceed to booking ─────────────────────────────────────────────────
     const handleProceedToBooking = () => {
-        // Method 1 (primary): pass tab as URL query param → most reliable
         router.push(`/booking?tab=${activeTab}`);
-
-        // Method 2 (backup): also save to localStorage in case URL param is lost
         localStorage.setItem('bookingServiceType', activeTab);
     };
 
-    // Fetch carousel slides from API
+    // ─── Fetch Makes on mount (only for oil tabs) ───────────────────────────
     useEffect(() => {
-        async function fetchSlides() {
-            try {
-                // Replace with your actual API endpoint
-                const response = await fetch('/api/service-slides');
-                const data = await response.json();
+        if (!isOilChangeTab) return;
+        setMakesLoading(true);
+        getAllMakes()
+            .then(setMakes)
+            .catch((err) => console.error('Failed to load makes', err))
+            .finally(() => setMakesLoading(false));
+    }, [isOilChangeTab]);
 
-                // Assuming API returns: { slides: [...] } or just [...]
-                const slidesData = Array.isArray(data) ? data : data?.slides || [];
+    // ─── Fetch Models when make changes ────────────────────────────────────
+    useEffect(() => {
+        if (!selectedMake) {
+            setModels([]);
+            setSelectedModel(null);
+            setYears([]);
+            setSelectedYear(null);
+            setConfigurations([]);
+            setSelectedConfiguration(null);
+            setVehicleDetail(null);
+            return;
+        }
+        setModelsLoading(true);
+        setSelectedModel(null);
+        setYears([]);
+        setSelectedYear(null);
+        setConfigurations([]);
+        setSelectedConfiguration(null);
+        getModelsByMake(selectedMake.id)
+            .then(setModels)
+            .catch((err) => console.error('Failed to load models', err))
+            .finally(() => setModelsLoading(false));
+    }, [selectedMake]);
 
-                if (slidesData.length > 0) {
-                    setSlides(slidesData);
+    // ─── Fetch Years when model changes ────────────────────────────────────
+    useEffect(() => {
+        if (!selectedModel) {
+            setYears([]);
+            setSelectedYear(null);
+            setConfigurations([]);
+            setSelectedConfiguration(null);
+            setVehicleDetail(null);
+            return;
+        }
+        setYearsLoading(true);
+        setSelectedYear(null);
+        setConfigurations([]);
+        setSelectedConfiguration(null);
+        getYearsByModel(selectedModel.id)
+            .then(setYears)
+            .catch((err) => console.error('Failed to load years', err))
+            .finally(() => setYearsLoading(false));
+    }, [selectedModel]);
+
+    // ─── Fetch Configurations when year changes ─────────────────────────────
+    useEffect(() => {
+        if (!selectedModel || !selectedYear) {
+            setConfigurations([]);
+            setSelectedConfiguration(null);
+            setVehicleDetail(null);
+            return;
+        }
+        setConfigurationsLoading(true);
+        setSelectedConfiguration(null);
+        setVehicleDetail(null);
+        getVehicleConfigurations(selectedModel.id, selectedYear)
+            .then(setConfigurations)
+            .catch((err) => console.error('Failed to load configurations', err))
+            .finally(() => setConfigurationsLoading(false));
+    }, [selectedModel, selectedYear]);
+
+    // ─── Mock fallback services (used when API is unavailable) ────────────────
+    const FALLBACK_SERVICES: ServiceEstimate[] = [
+        { service_id: 1, service_name: t('service.serviceOptions.engineOil'),        service_type: 'Home', base_labor_price: '55', products: [], total_estimated_price: '55',  total_duration_minutes: 30 },
+        { service_id: 2, service_name: t('service.serviceOptions.transmissionFluid'), service_type: 'Home', base_labor_price: '60', products: [], total_estimated_price: '60',  total_duration_minutes: 45 },
+        { service_id: 3, service_name: t('service.serviceOptions.engineFlush'),       service_type: 'Home', base_labor_price: '13', products: [], total_estimated_price: '13',  total_duration_minutes: 20 },
+        { service_id: 4, service_name: t('service.serviceOptions.brakeFluid'),        service_type: 'Home', base_labor_price: '15', products: [], total_estimated_price: '15',  total_duration_minutes: 20 },
+        { service_id: 5, service_name: t('service.serviceOptions.coolant'),           service_type: 'Home', base_labor_price: '45', products: [], total_estimated_price: '45',  total_duration_minutes: 30 },
+        { service_id: 6, service_name: t('service.serviceOptions.airCondition'),      service_type: 'Home', base_labor_price: '35', products: [], total_estimated_price: '35',  total_duration_minutes: 40 },
+    ];
+
+        // ─── Fetch Vehicle Detail when configuration (vehicle id) is selected ────
+    useEffect(() => {
+        if (!selectedConfiguration) {
+            setVehicleDetail(null);
+            return;
+        }
+        setVehicleDetailLoading(true);
+        getVehicleById(selectedConfiguration)
+            .then(setVehicleDetail)
+            .catch((err) => console.error('Failed to load vehicle detail', err))
+            .finally(() => setVehicleDetailLoading(false));
+    }, [selectedConfiguration]);
+
+    // ─── Fetch Service Estimates when vehicle + tab changes ────────────────────
+    useEffect(() => {
+        setServiceEstimates([]);
+        setSelectedServiceIds([]);
+
+        if (!selectedConfiguration || !isOilChangeTab) return;
+
+        const serviceType = activeTab === 'oil-home' ? 'Home' : 'Garage';
+        setServiceEstimatesLoading(true);
+
+        getServiceEstimates(selectedConfiguration, serviceType)
+            .then((data) => {
+                if (data && data.length > 0) {
+                    setServiceEstimates(data);
+                    // Auto-select the first service by default
+                    setSelectedServiceIds([data[0].service_id]);
                 } else {
-                    // Fallback to default slides if API returns empty
+                    console.warn('No service estimates from API, using fallback');
+                    setServiceEstimates(FALLBACK_SERVICES);
+                    setSelectedServiceIds([FALLBACK_SERVICES[0].service_id]);
+                }
+            })
+            .catch((err) => {
+                console.error('Service estimates fetch failed, using fallback:', err);
+                setServiceEstimates(FALLBACK_SERVICES);
+                setSelectedServiceIds([FALLBACK_SERVICES[0].service_id]);
+            })
+            .finally(() => setServiceEstimatesLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedConfiguration, activeTab]);
+
+        // ─── Carousel / Slides ──────────────────────────────────────────────────
+    useEffect(() => {
+        // Reset slides every time tab changes so stale data doesn't show
+        setSlides([]);
+        setCurrentSlide(0);
+        setSlidesLoading(true);
+
+        if (!isOilChangeTab) return;
+
+        const serviceType = activeTab === 'oil-home' ? 'Home' : 'Garage';
+
+        getSlideshow(serviceType)
+            .then((data) => {
+                // Use API data directly — only fall back if API returns empty array
+                if (data && data.length > 0) {
+                    setSlides(data);
+                } else {
+                    console.warn(`Slideshow API returned empty for "${serviceType}", using fallback`);
                     setSlides(getDefaultSlides());
                 }
-            } catch (error) {
-                console.error("Failed to load slides", error);
-                // Fallback to default slides on error
+            })
+            .catch((err) => {
+                console.error('Slideshow fetch failed:', err);
                 setSlides(getDefaultSlides());
-            } finally {
-                setSlidesLoading(false);
-            }
-        }
-
-        if (isOilChangeTab) {
-            fetchSlides();
-        }
+            })
+            .finally(() => setSlidesLoading(false));
     }, [activeTab, isOilChangeTab]);
 
-    // Default slides fallback
-    const getDefaultSlides = () => {
-        const isHome = activeTab === 'oil-home';
-        return [
-            {
-                id: 1,
-                image_url: isHome
-                    ? 'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=1400&q=80'
-                    : 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80',
-                badge_icon: 'home',
-                badge_text: isHome ? 'Home Service' : 'Garage Service',
-                title: isHome ? t('service.banner.homeServiceTitle') : t('service.banner.garageServiceTitle'),
-                description: isHome
-                    ? t('service.banner.homeServiceDesc')
-                    : t('service.banner.garageServiceDesc'),
-                features: [
-                    { text: t('service.banner.feature1') },
-                    { text: t('service.banner.feature2') },
-                    { text: t('service.banner.feature3') }
-                ]
-            },
-            {
-                id: 2,
-                image_url: isHome
-                    ? 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=80'
-                    : 'https://images.unsplash.com/photo-1632823471565-1ecdf5c6da45?w=1400&q=80',
-                badge_icon: 'award',
-                badge_text: 'Quality Guaranteed',
-                title: t('service.banner.qualityTitle'),
-                description: t('service.banner.qualityDesc'),
-                features: [
-                    { text: t('service.banner.qualityFeature1') },
-                    { text: t('service.banner.qualityFeature2') },
-                    { text: t('service.banner.qualityFeature3') }
-                ]
-            },
-            {
-                id: 3,
-                image_url: isHome
-                    ? 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=1400&q=80'
-                    : 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=1400&q=80',
-                badge_icon: 'clock',
-                badge_text: 'Fast & Efficient',
-                title: t('service.banner.fastTitle'),
-                description: t('service.banner.fastDesc'),
-                features: [
-                    { text: t('service.banner.fastFeature1') },
-                    { text: t('service.banner.fastFeature2') },
-                    { text: t('service.banner.fastFeature3') }
-                ]
-            },
-            {
-                id: 4,
-                image_url: isHome
-                    ? 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=1400&q=80'
-                    : 'https://images.unsplash.com/photo-1507136566006-cfc505b114fc?w=1400&q=80',
-                badge_icon: 'home',
-                badge_text: 'Special Offer',
-                title: t('service.banner.discountTitle'),
-                description: t('service.banner.discountDesc'),
-                features: [
-                    { text: t('service.banner.discountFeature1') },
-                    { text: t('service.banner.discountFeature2') },
-                    { text: t('service.banner.discountFeature3') }
-                ]
-            }
+    // Fallback slides if API returns empty (images only, matching Slide type)
+    const getDefaultSlides = (): Slide[] => {
+        const serviceType = activeTab === 'oil-home' ? 'Home' : 'Garage';
+        const homeImages = [
+            'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=1400&q=80',
+            'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1400&q=80',
+            'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=1400&q=80',
         ];
+        const garageImages = [
+            'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80',
+            'https://images.unsplash.com/photo-1632823471565-1ecdf5c6da45?w=1400&q=80',
+            'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=1400&q=80',
+        ];
+        const images = activeTab === 'oil-home' ? homeImages : garageImages;
+        return images.map((url, i) => ({ id: i + 1, image_url: url, service_type: serviceType as 'Home' | 'Garage' }));
     };
 
-    // Auto-advance carousel
     useEffect(() => {
         if (slides.length === 0) return;
-
         const interval = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 5000); // Change slide every 5 seconds
-
+        }, 5000);
         return () => clearInterval(interval);
     }, [slides.length]);
 
-    const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-    };
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    };
-
-    const goToSlide = (index: number) => {
-        setCurrentSlide(index);
-    };
-
-    // Helper function to get icon component
-    const getBadgeIcon = (iconName: string) => {
-        switch (iconName) {
-            case 'home': return activeTab === 'oil-home' ? Home : Building2;
-            case 'award': return Award;
-            case 'clock': return Clock;
-            default: return Home;
-        }
-    };
+    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    const goToSlide = (index: number) => setCurrentSlide(index);
 
 
+    // ─── Products ───────────────────────────────────────────────────────────
     useEffect(() => {
         async function fetchProducts() {
             try {
@@ -326,7 +326,7 @@ export default function ServiceRedesigned() {
                 const productData = Array.isArray(productRes) ? productRes : productRes?.data || [];
                 setProducts(productData);
             } catch (error) {
-                console.error("Failed to load products", error);
+                console.error('Failed to load products', error);
             } finally {
                 setLoading(false);
             }
@@ -334,57 +334,25 @@ export default function ServiceRedesigned() {
         fetchProducts();
     }, []);
 
-    // Reset dependent selections when parent changes
-    useEffect(() => {
-        setSelectedYear('');
-        setSelectedModel('');
-        setSelectedFuelType('');
-        setSelectedEngine('');
-    }, [selectedMake]);
+    // ─── Helpers ────────────────────────────────────────────────────────────
+    const handleProductClick = (productId: number) => router.push(`/service/product/${productId}`);
 
-    useEffect(() => {
-        setSelectedModel('');
-        setSelectedFuelType('');
-        setSelectedEngine('');
-    }, [selectedYear]);
-
-    useEffect(() => {
-        setSelectedFuelType('');
-        setSelectedEngine('');
-    }, [selectedModel]);
-
-    useEffect(() => {
-        setSelectedEngine('');
-    }, [selectedFuelType]);
-
-    const handleProductClick = (productId: number) => {
-        router.push(`/service/product/${productId}`);
+    const toggleService = (serviceId: number) => {
+        setSelectedServiceIds(prev =>
+            prev.includes(serviceId)
+                ? prev.filter(id => id !== serviceId)
+                : [...prev, serviceId]
+        );
     };
 
-    const toggleService = (serviceId: string) => {
-        const service = SERVICE_OPTIONS.find(s => s.id === serviceId);
-        if (service?.required) return; // Can't deselect required services
+    const calculateTotal = () =>
+        serviceEstimates
+            .filter(s => selectedServiceIds.includes(s.service_id))
+            .reduce((sum, s) => sum + parseFloat(s.total_estimated_price || '0'), 0);
 
-        if (selectedServices.includes(serviceId)) {
-            setSelectedServices(selectedServices.filter(id => id !== serviceId));
-        } else {
-            setSelectedServices([...selectedServices, serviceId]);
-        }
-    };
-
-    const calculateTotal = () => {
-        return SERVICE_OPTIONS
-            .filter(service => selectedServices.includes(service.id))
-            .reduce((sum, service) => sum + service.price, 0);
-    };
-
-    const getAvailableModels = () => {
-        return CAR_MODELS[selectedMake] || CAR_MODELS['Default'];
-    };
-
-    const getAvailableEngines = () => {
-        return ENGINE_TYPES[selectedFuelType] || [];
-    };
+    // All four steps filled
+    const isCarFullySelected =
+        !!selectedMake && !!selectedModel && !!selectedYear && selectedConfiguration !== null && !!vehicleDetail;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -393,78 +361,48 @@ export default function ServiceRedesigned() {
                     0%, 100% { transform: translateY(0px); }
                     50% { transform: translateY(-20px); }
                 }
-
                 .btn-3d {
                     position: relative;
                     transform-style: preserve-3d;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-
-                .btn-3d:hover {
-                    transform: translateY(-4px) scale(1.02);
-                }
-
-                .btn-3d:active {
-                    transform: translateY(0px) scale(0.98);
-                }
-
-                .service-card {
-                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                }
-
-                .service-card:hover {
-                    transform: translateY(-8px);
-                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                }
-
+                .btn-3d:hover { transform: translateY(-4px) scale(1.02); }
+                .btn-3d:active { transform: translateY(0px) scale(0.98); }
+                .service-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+                .service-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
                 @keyframes slideUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                    from { opacity: 0; transform: translateY(30px); }
+                    to   { opacity: 1; transform: translateY(0); }
                 }
-
-                .animate-slide-up {
-                    animation: slideUp 0.6s ease-out forwards;
-                }
+                .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
             `}</style>
 
-            {/* Hero Banner - Static Design */}
+            {/* ── Hero Banner ─────────────────────────────────────────────── */}
             <section className="relative h-[90vh] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-                {/* Background Pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute inset-0" style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
                         backgroundSize: '80px 80px'
                     }} />
                 </div>
-
                 <div className="absolute inset-0 bg-gradient-to-r from-[#DC2626]/20 via-transparent to-[#F97316]/20" />
 
                 <div className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto h-full flex items-center">
                     <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
-                        {/* Left - Text Content */}
                         <div className="text-white z-10">
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#DC2626] to-[#F97316] rounded-full mb-3 shadow-lg">
                                 <Star className="w-4 h-4 fill-current" />
                                 <span className="text-sm font-bold">Premium Car Care Services</span>
                             </div>
-
                             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-3 leading-tight">
                                 <span className="block text-white drop-shadow-2xl">{t('service.hero.title')}</span>
                                 <span className="block bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#F97316] bg-clip-text text-transparent mt-2">
                                     {t('service.hero.subtitle')}
                                 </span>
                             </h1>
-
                             <p className="text-lg sm:text-xl text-gray-300 max-w-xl leading-relaxed">
                                 {t('service.hero.description')}
                             </p>
-
                             <div className="flex flex-wrap gap-4 my-6">
                                 <button className="group relative px-8 py-4 bg-gradient-to-r from-[#DC2626] to-[#F97316] text-white font-bold rounded-xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] hover:scale-105">
                                     <div className="absolute inset-0 bg-gradient-to-r from-[#F97316] to-[#DC2626] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -475,7 +413,6 @@ export default function ServiceRedesigned() {
                                     </div>
                                 </button>
                             </div>
-
                             <div className="flex flex-wrap gap-8 mt-5 pt-10 border-t border-white/10">
                                 <div className="text-center">
                                     <div className="text-3xl font-black text-white mb-1">5000+</div>
@@ -491,21 +428,11 @@ export default function ServiceRedesigned() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Right - Static Image */}
                         <div className="hidden lg:block relative">
                             <div className="relative w-full h-[500px]">
-                                {/* Glow background */}
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-[#DC2626]/30 to-[#F97316]/30 rounded-full blur-3xl" />
-
-                                {/* Hero Image */}
                                 <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
-                                    <img
-                                        src="/home/aboutus.png"
-                                        alt="Car Service"
-                                        className="w-full h-full object-cover"
-                                    />
-                                    {/* Optional subtle overlay */}
+                                    <img src="/home/aboutus.png" alt="Car Service" className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                                 </div>
                             </div>
@@ -513,19 +440,14 @@ export default function ServiceRedesigned() {
                     </div>
                 </div>
 
-                {/* Wave Divider */}
                 <div className="absolute bottom-0 left-0 right-0">
                     <svg className="w-full h-16 sm:h-24" viewBox="0 0 1440 120" preserveAspectRatio="none">
-                        <path
-                            d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"
-                            fill="white"
-                            fillOpacity="1"
-                        />
+                        <path d="M0,64L48,69.3C96,75,192,85,288,80C384,75,480,53,576,48C672,43,768,53,864,64C960,75,1056,85,1152,80C1248,75,1344,53,1392,42.7L1440,32L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z" fill="white" fillOpacity="1" />
                     </svg>
                 </div>
             </section>
 
-            {/* Modern Navigation Tabs */}
+            {/* ── Navigation Tabs ──────────────────────────────────────────── */}
             <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 shadow-lg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="py-6">
@@ -547,42 +469,15 @@ export default function ServiceRedesigned() {
                                                 }
                                             `}
                                         >
-                                            <div className={`
-                                                relative p-2.5 rounded-xl transition-all duration-300
-                                                ${isActive
-                                                    ? 'bg-white/20'
-                                                    : 'bg-white group-hover:bg-gray-50'
-                                                }
-                                            `}>
-                                                <Icon className={`
-                                                    w-6 h-6 transition-all duration-300
-                                                    ${isActive
-                                                        ? 'text-white'
-                                                        : 'text-gray-600 group-hover:text-[#DC2626]'
-                                                    }
-                                                `} strokeWidth={2.5} />
+                                            <div className={`relative p-2.5 rounded-xl transition-all duration-300 ${isActive ? 'bg-white/20' : 'bg-white group-hover:bg-gray-50'}`}>
+                                                <Icon className={`w-6 h-6 transition-all duration-300 ${isActive ? 'text-white' : 'text-gray-600 group-hover:text-[#DC2626]'}`} strokeWidth={2.5} />
                                             </div>
-
                                             <div className="flex flex-col items-start gap-1">
-                                                <span className={`
-                                                    font-black text-base leading-none
-                                                    ${isActive ? 'text-white' : 'text-gray-900'}
-                                                `}>
+                                                <span className={`font-black text-base leading-none ${isActive ? 'text-white' : 'text-gray-900'}`}>
                                                     {tab.label}
                                                 </span>
                                             </div>
-
-                                            {isActive && (
-                                                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-white rounded-full shadow-lg" />
-                                            )}
-
-                                            <div className={`
-                                                absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10
-                                                ${isActive
-                                                    ? 'bg-gradient-to-r from-[#DC2626]/20 to-[#F97316]/20 blur-xl'
-                                                    : 'bg-gray-200/50 blur-md'
-                                                }
-                                            `} />
+                                            {isActive && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-white rounded-full shadow-lg" />}
                                         </button>
                                     );
                                 })}
@@ -592,15 +487,16 @@ export default function ServiceRedesigned() {
                 </div>
             </div>
 
-            {/* Tab Content */}
+            {/* ── Tab Content ──────────────────────────────────────────────── */}
             <div className="max-w-7xl mx-auto px-4 py-12">
-                {/* Oil Change Tabs (Home & Garage) */}
+
+                {/* Oil Change Tabs */}
                 {isOilChangeTab && (
                     <div className="space-y-16">
-                        {/* Service Slideshow Carousel - Pure React with API Data */}
+
+                        {/* Carousel */}
                         <section className="animate-slide-up">
                             {slidesLoading ? (
-                                // Loading skeleton
                                 <div className="relative w-full h-[400px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl bg-gray-200 animate-pulse">
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <div className="text-gray-400">Loading...</div>
@@ -608,103 +504,35 @@ export default function ServiceRedesigned() {
                                 </div>
                             ) : (
                                 <div className="relative w-full">
-                                    {/* Carousel wrapper */}
                                     <div className="relative h-[400px] md:h-[500px] overflow-hidden rounded-3xl shadow-2xl">
-                                        {slides.map((slide, index) => {
-                                            const BadgeIcon = getBadgeIcon(slide.badge_icon || 'home');
-                                            return (
-                                                <div
-                                                    key={slide.id || index}
-                                                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${currentSlide === index ? 'opacity-100 z-20' : 'opacity-0 z-10'}`}
-                                                >
-                                                    <div className="absolute inset-0">
-                                                        <img
-                                                            src={slide.image_url || '/services/default-service.jpg'}
-                                                            alt={slide.title || `Service Slide ${index + 1}`}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-                                                    </div>
-
-                                                    {/* Content Overlay */}
-                                                    <div className="absolute inset-0 flex items-center px-6 md:px-12">
-                                                        <div className="max-w-2xl">
-                                                            {/* Badge */}
-                                                            {slide.badge_text && (
-                                                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/90 backdrop-blur-md rounded-full mb-4 shadow-lg">
-                                                                    <BadgeIcon className="w-4 h-4 text-white" />
-                                                                    <span className="text-white text-sm font-bold">{slide.badge_text}</span>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Title */}
-                                                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight drop-shadow-2xl">
-                                                                {slide.title}
-                                                            </h2>
-
-                                                            {/* Description */}
-                                                            <p className="text-lg md:text-xl text-gray-200 mb-6 leading-relaxed">
-                                                                {slide.description}
-                                                            </p>
-
-                                                            {/* Features */}
-                                                            {slide.features && slide.features.length > 0 && (
-                                                                <div className="flex flex-wrap gap-4">
-                                                                    {slide.features.map((feature: any, idx: number) => (
-                                                                        <div key={idx} className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg">
-                                                                            <CheckCircle2 className="w-5 h-5 text-green-400" />
-                                                                            <span className="text-white font-semibold text-sm">{feature.text || feature}</span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Slider indicators */}
-                                    {slides.length > 1 && (
-                                        <div className="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-                                            {slides.map((_, index) => (
-                                                <button
-                                                    key={index}
-                                                    type="button"
-                                                    className={`w-3 h-3 rounded-full transition-all ${currentSlide === index ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'}`}
-                                                    aria-label={`Slide ${index + 1}`}
-                                                    onClick={() => goToSlide(index)}
+                                        {slides.map((slide, index) => (
+                                            <div
+                                                key={slide.id}
+                                                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${currentSlide === index ? 'opacity-100 z-20' : 'opacity-0 z-10'}`}
+                                            >
+                                                <img
+                                                    src={slide.image_url}
+                                                    alt={`${slide.service_type} service slide ${index + 1}`}
+                                                    className="w-full h-full object-cover"
                                                 />
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* Slider controls */}
+                                            </div>
+                                        ))}
+                                    </div>
                                     {slides.length > 1 && (
                                         <>
-                                            <button
-                                                type="button"
-                                                className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                                                onClick={prevSlide}
-                                            >
-                                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 backdrop-blur-md group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all">
-                                                    <svg className="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
-                                                    </svg>
-                                                    <span className="sr-only">Previous</span>
+                                            <div className="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3">
+                                                {slides.map((_, index) => (
+                                                    <button key={index} type="button" className={`w-3 h-3 rounded-full transition-all ${currentSlide === index ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'}`} onClick={() => goToSlide(index)} />
+                                                ))}
+                                            </div>
+                                            <button type="button" className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" onClick={prevSlide}>
+                                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 backdrop-blur-md group-hover:bg-white/50 transition-all">
+                                                    <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" /></svg>
                                                 </span>
                                             </button>
-                                            <button
-                                                type="button"
-                                                className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-                                                onClick={nextSlide}
-                                            >
-                                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 backdrop-blur-md group-hover:bg-white/50 group-focus:ring-4 group-focus:ring-white group-focus:outline-none transition-all">
-                                                    <svg className="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
-                                                    </svg>
-                                                    <span className="sr-only">Next</span>
+                                            <button type="button" className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" onClick={nextSlide}>
+                                                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 backdrop-blur-md group-hover:bg-white/50 transition-all">
+                                                    <svg className="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" /></svg>
                                                 </span>
                                             </button>
                                         </>
@@ -713,7 +541,7 @@ export default function ServiceRedesigned() {
                             )}
                         </section>
 
-                        {/* Car Selection Form - All in One Card */}
+                        {/* ── Car Filter Form ──────────────────────────────── */}
                         <section>
                             <div className="text-center mb-8">
                                 <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
@@ -725,10 +553,10 @@ export default function ServiceRedesigned() {
                             </div>
 
                             <div className="max-w-3xl mx-auto">
-                                {/* Single Card Container */}
                                 <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 border-2 border-gray-100">
                                     <div className="space-y-5">
-                                        {/* Car Make Selection - ALWAYS VISIBLE */}
+
+                                        {/* STEP 1 – Car Make */}
                                         <div>
                                             <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
                                                 <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
@@ -736,48 +564,28 @@ export default function ServiceRedesigned() {
                                                 </div>
                                                 {t('service.carFilter.carMake')} *
                                             </label>
-                                            <div className="relative">
-                                                <select
-                                                    value={selectedMake}
-                                                    onChange={(e) => setSelectedMake(e.target.value)}
-                                                    className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
-                                                >
-                                                    <option value="">{t('service.carFilter.selectCarMake')}</option>
-                                                    {CAR_MAKES.map(make => (
-                                                        <option key={make} value={make}>{make}</option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                                            </div>
-                                        </div>
-
-                                        {/* Year Selection - Shows after Make */}
-                                        {selectedMake && (
-                                            <div className="animate-slide-up">
-                                                <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                                                    <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
-                                                        <Calendar className="w-4 h-4 text-red-500" />
-                                                    </div>
-                                                    {t('service.carFilter.year')} *
-                                                </label>
+                                            {makesLoading ? <SelectSkeleton /> : (
                                                 <div className="relative">
                                                     <select
-                                                        value={selectedYear}
-                                                        onChange={(e) => setSelectedYear(e.target.value)}
+                                                        value={selectedMake?.id ?? ''}
+                                                        onChange={(e) => {
+                                                            const make = makes.find(m => m.id === Number(e.target.value)) ?? null;
+                                                            setSelectedMake(make);
+                                                        }}
                                                         className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
                                                     >
-                                                        <option value="">{t('service.carFilter.selectYear')}</option>
-                                                        {years.map(year => (
-                                                            <option key={year} value={year}>{year}</option>
+                                                        <option value="">{t('service.carFilter.selectCarMake')}</option>
+                                                        {makes.filter(m => m.is_active).map(make => (
+                                                            <option key={make.id} value={make.id}>{make.name}</option>
                                                         ))}
                                                     </select>
                                                     <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
 
-                                        {/* Model Selection - Shows after Year */}
-                                        {selectedYear && (
+                                        {/* STEP 2 – Car Model (shown after make) */}
+                                        {selectedMake && (
                                             <div className="animate-slide-up">
                                                 <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
@@ -785,49 +593,56 @@ export default function ServiceRedesigned() {
                                                     </div>
                                                     {t('service.carFilter.model')} *
                                                 </label>
-                                                <div className="relative">
-                                                    <select
-                                                        value={selectedModel}
-                                                        onChange={(e) => setSelectedModel(e.target.value)}
-                                                        className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
-                                                    >
-                                                        <option value="">{t('service.carFilter.selectModel')}</option>
-                                                        {getAvailableModels().map(model => (
-                                                            <option key={model} value={model}>{model}</option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                                                </div>
+                                                {modelsLoading ? <SelectSkeleton /> : (
+                                                    <div className="relative">
+                                                        <select
+                                                            value={selectedModel?.id ?? ''}
+                                                            onChange={(e) => {
+                                                                const model = models.find(m => m.id === Number(e.target.value)) ?? null;
+                                                                setSelectedModel(model);
+                                                            }}
+                                                            className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
+                                                        >
+                                                            <option value="">{t('service.carFilter.selectModel')}</option>
+                                                            {models.filter(m => m.is_active).map(model => (
+                                                                <option key={model.id} value={model.id}>{model.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
-                                        {/* Fuel Type Selection - Shows after Model */}
+                                        {/* STEP 3 – Year (shown after model) */}
                                         {selectedModel && (
                                             <div className="animate-slide-up">
                                                 <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
-                                                        <Droplet className="w-4 h-4 text-red-500" />
+                                                        <Calendar className="w-4 h-4 text-red-500" />
                                                     </div>
-                                                    {t('service.carFilter.fuelType')} *
+                                                    {t('service.carFilter.year')} *
                                                 </label>
-                                                <div className="relative">
-                                                    <select
-                                                        value={selectedFuelType}
-                                                        onChange={(e) => setSelectedFuelType(e.target.value)}
-                                                        className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
-                                                    >
-                                                        <option value="">{t('service.carFilter.selectFuelType')}</option>
-                                                        {FUEL_TYPES.map(fuel => (
-                                                            <option key={fuel} value={fuel}>{fuel}</option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                                                </div>
+                                                {yearsLoading ? <SelectSkeleton /> : (
+                                                    <div className="relative">
+                                                        <select
+                                                            value={selectedYear ?? ''}
+                                                            onChange={(e) => setSelectedYear(Number(e.target.value) || null)}
+                                                            className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
+                                                        >
+                                                            <option value="">{t('service.carFilter.selectYear')}</option>
+                                                            {years.map(year => (
+                                                                <option key={year} value={year}>{year}</option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
-                                        {/* Engine Selection - Shows after Fuel Type */}
-                                        {selectedFuelType && (
+                                        {/* STEP 4 – Configuration (shown after year) */}
+                                        {selectedYear && (
                                             <div className="animate-slide-up">
                                                 <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
                                                     <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center">
@@ -835,48 +650,74 @@ export default function ServiceRedesigned() {
                                                     </div>
                                                     {t('service.carFilter.engine')} *
                                                 </label>
-                                                <div className="relative">
-                                                    <select
-                                                        value={selectedEngine}
-                                                        onChange={(e) => setSelectedEngine(e.target.value)}
-                                                        className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
-                                                    >
-                                                        <option value="">{t('service.carFilter.selectEngine')}</option>
-                                                        {getAvailableEngines().map(engine => (
-                                                            <option key={engine} value={engine}>{engine}</option>
-                                                        ))}
-                                                    </select>
-                                                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                                                </div>
+                                                {configurationsLoading ? <SelectSkeleton /> : (
+                                                    <div className="relative">
+                                                        <select
+                                                            value={selectedConfiguration ?? ''}
+                                                            onChange={(e) => setSelectedConfiguration(Number(e.target.value) || null)}
+                                                            className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl font-semibold text-gray-900 focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-50 transition-all appearance-none cursor-pointer text-base"
+                                                        >
+                                                            <option value="">{t('service.carFilter.selectEngine')}</option>
+                                                            {configurations.length > 0
+                                                                ? configurations.map((vehicleId) => (
+                                                                    <option key={vehicleId} value={vehicleId}>Vehicle #{vehicleId}</option>
+                                                                ))
+                                                                : <option value="" disabled>No configurations available</option>
+                                                            }
+                                                        </select>
+                                                        <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
-                                        {/* Selected Car Summary - Shows when all fields are filled */}
-                                        {selectedMake && selectedYear && selectedModel && selectedFuelType && selectedEngine && (
-                                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-5 mt-6 animate-slide-up">
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
-                                                        <CheckCircle2 className="w-7 h-7 text-white" strokeWidth={2.5} />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <span className="text-sm font-bold text-green-700">{t('service.carFilter.yourCar')}</span>
+                                        {/* Vehicle Detail Summary - shown after configuration selected */}
+                                        {selectedConfiguration !== null && (
+                                            <div className="mt-6 animate-slide-up">
+                                                {vehicleDetailLoading ? (
+                                                    <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-5 animate-pulse space-y-3">
+                                                        <div className="h-5 bg-gray-200 rounded w-1/3" />
+                                                        <div className="h-8 bg-gray-200 rounded w-2/3" />
+                                                        <div className="flex gap-2">
+                                                            {[...Array(4)].map((_, i) => <div key={i} className="h-8 bg-gray-200 rounded-lg w-24" />)}
                                                         </div>
-                                                        <p className="text-2xl font-black text-gray-900 mb-3">
-                                                            {selectedYear} {selectedMake} {selectedModel}
-                                                        </p>
+                                                    </div>
+                                                ) : vehicleDetail ? (
+                                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-5">
+                                                        {/* Header */}
+                                                        <div className="flex items-center gap-3 mb-4">
+                                                            <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                                                                <CheckCircle2 className="w-6 h-6 text-white" strokeWidth={2.5} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-xs font-bold text-green-600 uppercase tracking-wide">{t('service.carFilter.yourCar')}</p>
+                                                                <p className="text-xl font-black text-gray-900">
+                                                                    {vehicleDetail.year} {vehicleDetail.model.make.name} {vehicleDetail.model.name}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Detail Badges */}
                                                         <div className="flex flex-wrap gap-2">
-                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border-2 border-green-200 shadow-sm">
-                                                                <Droplet className="w-4 h-4 text-green-600" />
-                                                                <span className="text-sm font-semibold text-gray-700">{selectedFuelType}</span>
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg border border-green-200 shadow-sm">
+                                                                <Car className="w-4 h-4 text-green-600" />
+                                                                <span className="text-xs font-bold text-gray-700">{vehicleDetail.model.make.name} {vehicleDetail.model.name}</span>
                                                             </span>
-                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border-2 border-green-200 shadow-sm">
-                                                                <Zap className="w-4 h-4 text-green-600" />
-                                                                <span className="text-sm font-semibold text-gray-700">{selectedEngine}</span>
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg border border-green-200 shadow-sm">
+                                                                <Shield className="w-4 h-4 text-blue-500" />
+                                                                <span className="text-xs font-bold text-gray-700">{vehicleDetail.vehicle_type}</span>
+                                                            </span>
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg border border-green-200 shadow-sm">
+                                                                <Droplet className="w-4 h-4 text-blue-400" />
+                                                                <span className="text-xs font-bold text-gray-700">{vehicleDetail.fuel_type}</span>
+                                                            </span>
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-white rounded-lg border border-green-200 shadow-sm">
+                                                                <Zap className="w-4 h-4 text-orange-500" />
+                                                                <span className="text-xs font-bold text-gray-700">{vehicleDetail.engine}L</span>
                                                             </span>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                ) : null}
                                             </div>
                                         )}
                                     </div>
@@ -884,8 +725,8 @@ export default function ServiceRedesigned() {
                             </div>
                         </section>
 
-                        {/* Service Selection Section - Single Card with Image & Checkboxes */}
-                        {selectedMake && selectedYear && selectedModel && selectedFuelType && selectedEngine && (
+                        {/* ── Service Selection ────────────────────────────── */}
+                        {isCarFullySelected && (
                             <section id="service-cards-section" className="mt-12 animate-slide-up">
                                 <div className="text-center mb-12">
                                     <div className="inline-block px-6 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mb-4">
@@ -899,33 +740,22 @@ export default function ServiceRedesigned() {
                                     </p>
                                 </div>
 
-                                {/* Single Service Card with Image on Left, Checkboxes on Right */}
                                 <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-gray-200">
                                     <div className="grid grid-cols-1 lg:grid-cols-[65%_35%] gap-0">
-                                        {/* Left Side - Service Image */}
+                                        {/* Left – Image */}
                                         <div className="relative h-[400px] lg:h-auto">
-                                            <img
-                                                src="/home/Toyota Alphard 2023(v6).jpg"
-                                                alt="Service Package"
-                                                className="w-full h-full object-cover"
-                                            />
+                                            <img src="/home/Toyota Alphard 2023(v6).jpg" alt="Service Package" className="w-full h-full object-cover" />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-
-                                            {/* Service Info Overlay */}
                                             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                                                 <div className="inline-block px-4 py-2 bg-red-500/90 backdrop-blur-md rounded-full mb-3">
                                                     <span className="text-sm font-bold">V4 Package</span>
                                                 </div>
-                                                <h3 className="text-3xl font-black mb-2">
-                                                    {t('service.package.title')}
-                                                </h3>
-                                                <p className="text-lg opacity-90">
-                                                    {t('service.package.subtitle')}
-                                                </p>
+                                                <h3 className="text-3xl font-black mb-2">{t('service.package.title')}</h3>
+                                                <p className="text-lg opacity-90">{t('service.package.subtitle')}</p>
                                             </div>
                                         </div>
 
-                                        {/* Right Side - Service Checkboxes (6 options) */}
+                                        {/* Right – Checkboxes */}
                                         <div className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-white">
                                             <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
                                                 <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
@@ -934,86 +764,76 @@ export default function ServiceRedesigned() {
                                                 {t('service.package.selectService')}
                                             </h3>
 
+                                            {/* Service list — API data or fallback mock */}
                                             <div className="space-y-3 mb-8">
-                                                {SERVICE_OPTIONS.map((service, index) => (
-                                                    <div
-                                                        key={service.id}
-                                                        onClick={() => toggleService(service.id)}
-                                                        className={`
-                                                            relative flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
-                                                            ${selectedServices.includes(service.id)
-                                                                ? 'border-green-500 bg-green-50 shadow-md'
-                                                                : 'border-gray-200 bg-white hover:border-red-300 hover:shadow-md'
-                                                            }
-                                                            ${service.required ? 'cursor-not-allowed' : ''}
-                                                        `}
-                                                    >
-                                                        {/* Number Badge */}
-                                                        <div className={`
-                                                            w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0
-                                                            ${selectedServices.includes(service.id)
-                                                                ? 'bg-green-500 text-white'
-                                                                : 'bg-gray-200 text-gray-600'
-                                                            }
-                                                        `}>
-                                                            {index + 1}
-                                                        </div>
-
-                                                        {/* Service Info */}
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h4 className="font-black text-gray-900 text-sm md:text-base">
-                                                                    {service.title}
-                                                                </h4>
-                                                                {service.required && (
-                                                                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
-                                                                        {t('service.required', { defaultValue: 'តម្រូវ' })}
-                                                                    </span>
-                                                                )}
+                                                {serviceEstimatesLoading ? (
+                                                    // Skeleton while loading
+                                                    [...Array(4)].map((_, i) => (
+                                                        <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+                                                    ))
+                                                ) : serviceEstimates.map((service, index) => {
+                                                    const isSelected = selectedServiceIds.includes(service.service_id);
+                                                    const price = parseFloat(service.total_estimated_price || '0');
+                                                    return (
+                                                        <div
+                                                            key={service.service_id}
+                                                            onClick={() => toggleService(service.service_id)}
+                                                            className={`relative flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
+                                                                ${isSelected
+                                                                    ? 'border-green-500 bg-green-50 shadow-md'
+                                                                    : 'border-gray-200 bg-white hover:border-red-300 hover:shadow-md'
+                                                                }`}
+                                                        >
+                                                            {/* Index badge */}
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm flex-shrink-0 ${isSelected ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                                                {index + 1}
                                                             </div>
-                                                            <p className="text-xs text-gray-600 mb-1">
-                                                                {service.title}
-                                                            </p>
-                                                            <p className="text-lg font-black text-red-600">
-                                                                ${service.price}
-                                                            </p>
-                                                        </div>
 
-                                                        {/* Checkbox */}
-                                                        <div className={`
-                                                            w-7 h-7 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all
-                                                            ${selectedServices.includes(service.id)
-                                                                ? 'bg-green-500 border-green-500 scale-110'
-                                                                : 'bg-white border-gray-300'
-                                                            }
-                                                        `}>
-                                                            {selectedServices.includes(service.id) && (
-                                                                <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />
-                                                            )}
+                                                            {/* Service info */}
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                    <h4 className="font-black text-gray-900 text-sm md:text-base">{service.service_name}</h4>
+                                                                    <span className={`px-2 py-0.5 text-white text-xs font-bold rounded-full ${service.service_type === 'Home' ? 'bg-blue-500' : 'bg-purple-500'}`}>
+                                                                        {service.service_type}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3">
+                                                                    <p className="text-lg font-black text-red-600">
+                                                                        ${isNaN(price) ? '—' : price.toFixed(2)}
+                                                                    </p>
+                                                                    {service.total_duration_minutes > 0 && (
+                                                                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                                                                            <Clock className="w-3 h-3" />
+                                                                            {service.total_duration_minutes} min
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Checkbox */}
+                                                            <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-green-500 border-green-500 scale-110' : 'bg-white border-gray-300'}`}>
+                                                                {isSelected && <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={3} />}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
 
-                                            {/* Total Price */}
                                             <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 mb-6">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div>
                                                         <p className="text-gray-400 text-sm mb-1">{t('service.selectedServices')}</p>
-                                                        <p className="text-white text-2xl font-black">
-                                                            {selectedServices.length} services
-                                                        </p>
+                                                        <p className="text-white text-2xl font-black">{selectedServiceIds.length} services</p>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-gray-400 text-sm mb-1">{t('service.totalPrice')}</p>
                                                         <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
-                                                            ${calculateTotal()}
+                                                            ${calculateTotal().toFixed(2)}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Book Button */}
                                             <button onClick={handleProceedToBooking} className="btn-3d w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-5 rounded-xl font-black text-lg shadow-2xl flex items-center justify-center gap-3">
                                                 <Calendar className="w-6 h-6" />
                                                 {t('service.bookNow')}
@@ -1035,17 +855,13 @@ export default function ServiceRedesigned() {
                                 <div className="inline-block px-6 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full mb-4">
                                     <span className="text-purple-600 font-bold text-sm">{t('service.products.badge')}</span>
                                 </div>
-                                <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-                                    {t('service.products.title')}
-                                </h2>
+                                <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">{t('service.products.title')}</h2>
                                 <p className="text-xl text-gray-600">{t('service.products.subtitle')}</p>
                             </div>
 
                             {loading ? (
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {[...Array(6)].map((_, index) => (
-                                        <ProductCardSkeleton key={index} />
-                                    ))}
+                                    {[...Array(6)].map((_, index) => <ProductCardSkeleton key={index} />)}
                                 </div>
                             ) : products.length === 0 ? (
                                 <div className="text-center py-16">
@@ -1056,54 +872,27 @@ export default function ServiceRedesigned() {
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {products.map((product: any, index: number) => (
-                                        <div
-                                            key={product.product_id}
-                                            className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                                        >
-                                            {/* Image */}
+                                        <div key={product.product_id} className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100 flex flex-col transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                                             <div className="relative h-56 overflow-hidden bg-gray-100">
-                                                <img
-                                                    src={product.image_url || '/placeholder-product.jpg'}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                                                />
+                                                <img src={product.image_url || '/placeholder-product.jpg'} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                                                 {index < 3 && (
-                                                    <div className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-[#DC2626] to-[#F97316] text-white text-xs font-black rounded-full shadow-lg">
-                                                        🔥 Popular
-                                                    </div>
+                                                    <div className="absolute top-3 left-3 px-3 py-1 bg-gradient-to-r from-[#DC2626] to-[#F97316] text-white text-xs font-black rounded-full shadow-lg">🔥 Popular</div>
                                                 )}
-                                                <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-md text-white text-xs font-bold rounded-lg">
-                                                    #{index + 1}
-                                                </div>
+                                                <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-md text-white text-xs font-bold rounded-lg">#{index + 1}</div>
                                             </div>
-
-                                            {/* Content */}
                                             <div className="p-5 flex flex-col flex-1">
                                                 <p className="text-xs text-gray-400 font-semibold mb-1">#PRD{product.product_id}</p>
-                                                <h3 className="text-base font-black text-gray-900 mb-2 line-clamp-2 leading-snug">
-                                                    {product.name}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-                                                    {product.description}
-                                                </p>
-
-                                                {/* Rating */}
+                                                <h3 className="text-base font-black text-gray-900 mb-2 line-clamp-2 leading-snug">{product.name}</h3>
+                                                <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">{product.description}</p>
                                                 <div className="flex items-center gap-1 mb-4">
                                                     {[...Array(5)].map((_, i) => (
                                                         <Star key={i} className={`w-4 h-4 ${i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200 fill-gray-200'}`} />
                                                     ))}
                                                     <span className="text-xs text-gray-500 ml-1">(150)</span>
                                                 </div>
-
-                                                {/* Price + Button */}
                                                 <div className="flex items-center justify-between gap-3 mt-auto">
-                                                    <p className="text-2xl font-black text-[#DC2626]">
-                                                        ${Number(product.selling_price).toFixed(2)}
-                                                    </p>
-                                                    <button
-                                                        onClick={() => handleProductClick(product.product_id)}
-                                                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#DC2626] to-[#F97316] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-                                                    >
+                                                    <p className="text-2xl font-black text-[#DC2626]">${Number(product.selling_price).toFixed(2)}</p>
+                                                    <button onClick={() => handleProductClick(product.product_id)} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#DC2626] to-[#F97316] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
                                                         <ChevronRight className="w-4 h-4" />
                                                         View Detail
                                                     </button>
@@ -1121,21 +910,14 @@ export default function ServiceRedesigned() {
             {/* Footer CTA */}
             <section className="relative overflow-hidden bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#F97316] text-white py-20 mt-20">
                 <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-                    }} />
+                    <div className="absolute inset-0" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
                 </div>
-
                 <div className="relative max-w-7xl mx-auto px-4 text-center">
                     <div className="inline-block px-6 py-2 bg-white/20 backdrop-blur-md rounded-full mb-6">
                         <span className="text-sm font-bold">{t('service.contact.badge')}</span>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black mb-4">
-                        {t('service.contact.title')}
-                    </h2>
-                    <p className="text-xl md:text-2xl mb-10 opacity-95 max-w-2xl mx-auto font-medium">
-                        {t('service.contact.subtitle')}
-                    </p>
+                    <h2 className="text-3xl md:text-5xl font-black mb-4">{t('service.contact.title')}</h2>
+                    <p className="text-xl md:text-2xl mb-10 opacity-95 max-w-2xl mx-auto font-medium">{t('service.contact.subtitle')}</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <button className="btn-3d bg-white text-[#DC2626] px-10 py-5 rounded-2xl font-black text-lg hover:bg-gray-100 shadow-2xl flex items-center gap-3 group">
                             <MapPin className="w-6 h-6" />
