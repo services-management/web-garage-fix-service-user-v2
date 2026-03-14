@@ -50,7 +50,9 @@ export async function getVehicleConfigurations(modelId: number, year: number): P
 // GET /vehicles/{vehicle_id}
 // Returns full vehicle details including engine, fuel type, transmission, etc.
 export async function getVehicleById(vehicleId: number): Promise<VehicleDetail> {
-    return fetchAPI(`/vehicles/${vehicleId}`);
+    // Ensure vehicleId is an integer - the API may return decimal IDs that need to be floored
+    const integerId = Math.floor(vehicleId);
+    return fetchAPI(`/vehicles/${integerId}`);
 }
 
 // ─── Service Estimate Prices ────────────────────────────────────────────────
@@ -78,5 +80,7 @@ export async function getServiceEstimates(
     vehicleId: number,
     serviceType: 'Home' | 'Garage'
 ): Promise<ServiceEstimate[]> {
-    return fetchAPI(`/service/estimate-prices?vehicle_id=${vehicleId}&service_type=${serviceType}`);
+    // Ensure vehicleId is an integer - the API may return decimal IDs that need to be floored
+    const integerId = Math.floor(vehicleId);
+    return fetchAPI(`/service/estimate-prices?vehicle_id=${integerId}&service_type=${serviceType}`);
 }
